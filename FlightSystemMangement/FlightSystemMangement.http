@@ -1,0 +1,6 @@
+@FlightSystemMangement_HostAddress = http://localhost:5094
+
+GET {{FlightSystemMangement_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
