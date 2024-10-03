@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightSystemMangement", "FlightSystemMangement\FlightSystemMangement.csproj", "{F0A644A8-38AB-4C36-933C-E7E103E96F96}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightSystemManagement", "FlightSystemManagement\FlightSystemManagement.csproj", "{F0A644A8-38AB-4C36-933C-E7E103E96F96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
