@@ -146,3 +146,4 @@
 /Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/obj/Debug/net8.0/FlightSystemManagement.pdb
 /Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/obj/Debug/net8.0/FlightSystemManagement.genruntimeconfig.cache
 /Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/obj/Debug/net8.0/ref/FlightSystemManagement.dll
+/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/bin/Debug/net8.0/BCrypt.Net-Next.dll

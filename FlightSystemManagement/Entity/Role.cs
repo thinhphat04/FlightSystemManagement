@@ -1,12 +1,14 @@
-namespace FlightSystemManagement.Entity;
+using FlightSystemManagement.Entity;
 
-public class Role
+namespace FlightSystemManagement.Entity
 {
-    public int Id { get; set; } // Unique identifier for the role
-    public string RoleName { get; set; } // Name of the role (e.g., Admin, Pilot, Cabin Crew)
-    public string Description { get; set; } // Description of the role
+    public class Role
+    {
+        public int RoleID { get; set; }
+        public string RoleName { get; set; }
+        public string Description { get; set; }
 
-    // Navigation properties
-    public ICollection<UserRole> UserRoles { get; set; } // Many-to-Many relationship with Users
-    public ICollection<Permission> Permissions { get; set; } // One-to-Many relationship with Permissions
+        // Navigation property
+        public ICollection<UserRole> UserRoles { get; set; }
+    }
 }

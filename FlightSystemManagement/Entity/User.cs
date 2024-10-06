@@ -1,21 +1,25 @@
-namespace FlightSystemManagement.Entity;
-
-public class User
+namespace FlightSystemManagement.Entity
 {
-    public int Id { get; set; } // Unique identifier for the user
-    public string Email { get; set; } // Email address of the user
-    public bool IsAdmin { get; set; } = false; // Indicates if the user is an admin
-    public string Name { get; set; } // Name of the user
-    public string PasswordHash { get; set; } // Encrypted password of the user
-    public List<string> Wishlist { get; set; } // List of wishlist items for the user
-    public string Phone { get; set; } // Phone number of the user
-    public int? ResetPasswordOtp { get; set; } // OTP for password reset
-    public DateTime? ResetPasswordOtpExpires { get; set; } // Expiry time for password reset OTP
-    public List<string> Cart { get; set; } // List of products in the user's cart
-    public string PaymentCustomerId { get; set; } // Payment customer ID for integration
+    public class User
+    {
+        public int UserID { get; set; }
+        public string Email { get; set; }
+        public string PasswordHash { get; set; }
+        public string FullName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Status { get; set; } = "Active";
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    // Navigation properties
-    public ICollection<UserRole> UserRoles { get; set; } // Many-to-Many relationship with Roles
-    public ICollection<Document> Documents { get; set; } // One-to-Many relationship with Documents
-    public ICollection<FlightCrew> FlightCrews { get; set; } // Many-to-Many relationship with Flights (FlightCrew)
+        // Navigation properties
+        public ICollection<UserRole> UserRoles { get; set; }
+        public ICollection<Document> Documents { get; set; }
+        public ICollection<UserFlightAssignment> Assignments { get; set; }
+        
+        public User()
+        {
+            UserRoles = new List<UserRole>();
+            Documents = new List<Document>();
+            Assignments = new List<UserFlightAssignment>();
+        }
+    }
 }

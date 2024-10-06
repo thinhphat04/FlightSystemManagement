@@ -1,95 +1,68 @@
 using FlightSystemManagement.Entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace FlightSystemManagement.Data;
+namespace FlightSystemManagement.Data
+{
     public class FlightSystemContext : DbContext
     {
-        // Constructor
         public FlightSystemContext(DbContextOptions<FlightSystemContext> options) : base(options)
         {
         }
 
         // DbSets for entities
-        public DbSet<User> User { get; set; }
-        public DbSet<Role> Role { get; set; }
-        public DbSet<UserRole> UserRole { get; set; }
-        public DbSet<Document> Document { get; set; }
-        public DbSet<DocumentType> DocumentType { get; set; }
-        public DbSet<Permission> Permission { get; set; }
-        public DbSet<Flight> Flight { get; set; }
-        public DbSet<FlightCrew> FlightCrew { get; set; }
-        public DbSet<FlightDocument> FlightDocument { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentType> DocumentTypes { get; set; }
+        public DbSet<Flight> Flights { get; set; }
+        public DbSet<UserFlightAssignment> UserFlightAssignments { get; set; }
+        public DbSet<FlightDocument> FlightDocuments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Set table names explicitly
-            modelBuilder.Entity<User>().ToTable("User");
-            modelBuilder.Entity<Role>().ToTable("Role");
-            modelBuilder.Entity<UserRole>().ToTable("UserRole");
-            modelBuilder.Entity<Document>().ToTable("Document");
-            modelBuilder.Entity<DocumentType>().ToTable("DocumentType");
-            modelBuilder.Entity<Permission>().ToTable("Permission");
-            modelBuilder.Entity<Flight>().ToTable("Flight");
-            modelBuilder.Entity<FlightCrew>().ToTable("FlightCrew");
-            modelBuilder.Entity<FlightDocument>().ToTable("FlightDocument");
-
-            // Configure UserRoles composite key
+            // Configure composite keys
             modelBuilder.Entity<UserRole>()
-                .HasKey(ur => new { ur.UserId, ur.RoleId });
+                .HasKey(ur => new { ur.UserID, ur.RoleID });
 
-            // Configure UserRoles relationships
+            modelBuilder.Entity<UserFlightAssignment>()
+                .HasKey(ufa => new { ufa.UserID, ufa.FlightID });
+
+            // Configure relationships
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.User)
                 .WithMany(u => u.UserRoles)
-                .HasForeignKey(ur => ur.UserId);
+                .HasForeignKey(ur => ur.UserID);
 
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.Role)
                 .WithMany(r => r.UserRoles)
-                .HasForeignKey(ur => ur.RoleId);
+                .HasForeignKey(ur => ur.RoleID);
 
-            // Configure FlightCrew composite key
-            modelBuilder.Entity<FlightCrew>()
-                .HasKey(fc => new { fc.FlightId, fc.UserId });
+            modelBuilder.Entity<UserFlightAssignment>()
+                .HasOne(ufa => ufa.User)
+                .WithMany(u => u.Assignments)
+                .HasForeignKey(ufa => ufa.UserID);
 
-            // Configure FlightCrew relationships
-            modelBuilder.Entity<FlightCrew>()
-                .HasOne(fc => fc.Flight)
-                .WithMany(f => f.FlightCrews)
-                .HasForeignKey(fc => fc.FlightId);
+            modelBuilder.Entity<UserFlightAssignment>()
+                .HasOne(ufa => ufa.Flight)
+                .WithMany(f => f.Assignments)
+                .HasForeignKey(ufa => ufa.FlightID);
 
-            modelBuilder.Entity<FlightCrew>()
-                .HasOne(fc => fc.User)
-                .WithMany(u => u.FlightCrews)
-                .HasForeignKey(fc => fc.UserId);
-
-            // Configure FlightDocuments relationships
             modelBuilder.Entity<FlightDocument>()
                 .HasOne(fd => fd.Flight)
                 .WithMany(f => f.FlightDocuments)
-                .HasForeignKey(fd => fd.FlightId);
+                .HasForeignKey(fd => fd.FlightID);
 
             modelBuilder.Entity<FlightDocument>()
                 .HasOne(fd => fd.Document)
                 .WithMany(d => d.FlightDocuments)
-                .HasForeignKey(fd => fd.DocumentId);
+                .HasForeignKey(fd => fd.DocumentID);
 
-            // Configure Permissions relationships
-            modelBuilder.Entity<Permission>()
-                .HasOne(p => p.Role)
-                .WithMany(r => r.Permissions)
-                .HasForeignKey(p => p.RoleId);
-
-            modelBuilder.Entity<Permission>()
-                .HasOne(p => p.DocumentType)
-                .WithMany(dt => dt.Permissions)
-                .HasForeignKey(p => p.DocumentTypeId);
-
-            // Configure Documents relationships
             modelBuilder.Entity<Document>()
                 .HasOne(d => d.DocumentType)
                 .WithMany(dt => dt.Documents)
-                .HasForeignKey(d => d.DocumentTypeId);
+                .HasForeignKey(d => d.DocumentTypeID);
 
             modelBuilder.Entity<Document>()
                 .HasOne(d => d.User)
@@ -99,3 +72,4 @@ namespace FlightSystemManagement.Data;
             base.OnModelCreating(modelBuilder);
         }
     }
+}

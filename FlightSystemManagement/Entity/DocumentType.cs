@@ -1,11 +1,11 @@
-namespace FlightSystemManagement.Entity;
-
-public class DocumentType
+namespace FlightSystemManagement.Entity
 {
-    public int Id { get; set; } // Unique identifier for the document type
-    public string TypeName { get; set; } // Name of the document type (e.g., Flight Manual, Safety Report)
+    public class DocumentType
+    {
+        public int DocumentTypeID { get; set; }
+        public string TypeName { get; set; }
 
-    // Navigation properties
-    public ICollection<Document> Documents { get; set; } // One-to-Many relationship with Documents
-    public ICollection<Permission> Permissions { get; set; } // One-to-Many relationship with Permissions
+        // Navigation property
+        public ICollection<Document> Documents { get; set; }
+    }
 }
