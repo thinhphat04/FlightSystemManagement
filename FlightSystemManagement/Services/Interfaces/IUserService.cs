@@ -28,5 +28,9 @@ namespace FlightSystemManagement.Services.Interfaces
 
         // Kiểm tra người dùng có phải là Phi công/Tiếp viên hay không
         bool IsPilotOrCabinCrew(int userId);
+        
+        Task<List<Role>> GetUserRolesAsync(int userId); // Add this line
+        
+        
     }
 }

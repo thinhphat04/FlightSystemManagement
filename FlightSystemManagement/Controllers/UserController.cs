@@ -1,7 +1,11 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using FlightSystemManagement.Entity;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
+using FlightSystemManagement.DTO;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FlightSystemManagement.Controllers
 {
@@ -10,10 +14,12 @@ namespace FlightSystemManagement.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IConfiguration _configuration;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IConfiguration configuration)
         {
             _userService = userService;
+            _configuration = configuration;
         }
 
         // Lấy danh sách tất cả người dùng
@@ -33,10 +39,18 @@ namespace FlightSystemManagement.Controllers
             return Ok(user);
         }
 
-        // Tạo người dùng mới
-        [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] User user)
+        // Tạo người dùng mới RegisterDto
+        [HttpPost("register")]
+        public async Task<IActionResult> CreateUser([FromBody] RegisterDto registerDto)
         {
+            var user = new User
+            {
+                Email = registerDto.Email,
+                PasswordHash = registerDto.Password,
+                FullName = registerDto.FullName,
+                PhoneNumber = registerDto.PhoneNumber
+            };
+
             try
             {
                 var createdUser = await _userService.CreateUserAsync(user);
@@ -45,10 +59,6 @@ namespace FlightSystemManagement.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while creating the user.", error = ex.Message });
             }
         }
 
@@ -61,25 +71,45 @@ namespace FlightSystemManagement.Controllers
             return NoContent();
         }
 
-        // Đăng nhập người dùng
+        // Đăng nhập người dùng loginDto
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] JsonElement loginData)
+        public async Task<IActionResult> Authenticate([FromBody] LoginDto loginDto)
         {
-            // Truy xuất email và password từ JsonElement
-            if (!loginData.TryGetProperty("email", out var emailElement) ||
-                !loginData.TryGetProperty("password", out var passwordElement))
+            var user = await _userService.AuthenticateAsync(loginDto.Email, loginDto.Password);
+            if (user == null) return Unauthorized();
+
+            // Generate JWT token
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+
+            // Get user roles
+            var userRoles = await _userService.GetUserRolesAsync(user.UserID);
+
+            var claims = new List<Claim>
             {
-                return BadRequest("Email and password are required.");
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString())
+            };
+
+            // Add roles to the claims
+            foreach (var role in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.RoleName));
             }
 
-            string email = emailElement.GetString();
-            string password = passwordElement.GetString();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
 
-            // Thực hiện xác thực
-            var user = await _userService.AuthenticateAsync(email, password);
-            if (user == null) return Unauthorized("Invalid email or password");
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
 
-            return Ok(user);
+            return Ok(new { Token = tokenString });
         }
+
     }
 }

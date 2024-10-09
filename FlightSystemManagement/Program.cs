@@ -1,17 +1,47 @@
 using System.Text;
 using FlightSystemManagement.Data;
+using FlightSystemManagement.Entity;
 using FlightSystemManagement.Services;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Thêm các dịch vụ vào container
 // Hỗ trợ Swagger/OpenAPI cho tài liệu hóa và kiểm thử API
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Jwt auth header",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer",
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+});
 
 // Đăng ký dịch vụ Controller để hỗ trợ API
 builder.Services.AddControllers();
@@ -19,8 +49,7 @@ builder.Services.AddControllers();
 // Đăng ký dịch vụ IUserService với triển khai UserService, sử dụng Dependency Injection (DI)
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
-
-
+builder.Services.AddScoped<IFlightService, FlightService>();
 // Cấu hình xác thực JWT (JSON Web Token) cho ứng dụng
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

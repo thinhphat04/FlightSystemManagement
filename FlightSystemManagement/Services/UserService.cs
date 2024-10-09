@@ -8,10 +8,13 @@ namespace FlightSystemManagement.Services
     public class UserService : IUserService
     {
         private readonly FlightSystemContext _context;
+        
+        
 
         public UserService(FlightSystemContext context)
         {
             _context = context;
+            
         }
 
         public async Task<User> AuthenticateAsync(string email, string password)
@@ -22,9 +25,8 @@ namespace FlightSystemManagement.Services
                 return null;
             }
 
-            // Kiểm tra mật khẩu
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email && u.PasswordHash == password);
-            if (user == null) return null;
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)) return null;
 
             // Load roles for the user
             var userRoles = await _context.UserRoles
@@ -56,6 +58,9 @@ namespace FlightSystemManagement.Services
                 throw new ArgumentException("Email must belong to the 'vietjetair.com' domain.");
             }
 
+            // Hash the password before saving
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -86,6 +91,17 @@ namespace FlightSystemManagement.Services
         {
             return _context.UserRoles.Any(ur => ur.UserID == userId && 
                 (ur.Role.RoleName == "Pilot" || ur.Role.RoleName == "CabinCrew"));
+        }
+        
+        public async Task<List<Role>> GetUserRolesAsync(int userId)
+        {
+            var userRoles = await _context.UserRoles
+                .Where(ur => ur.UserID == userId)
+                .Include(ur => ur.Role) // Load the Role navigation property
+                .Select(ur => ur.Role)
+                .ToListAsync();
+
+            return userRoles;
         }
     }
 }

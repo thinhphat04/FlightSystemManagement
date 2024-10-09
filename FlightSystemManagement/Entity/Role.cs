@@ -1,4 +1,3 @@
-using FlightSystemManagement.Entity;
 
 namespace FlightSystemManagement.Entity
 {
@@ -10,5 +9,6 @@ namespace FlightSystemManagement.Entity
 
         // Navigation property
         public ICollection<UserRole> UserRoles { get; set; }
+        public ICollection<PermissionGroupAssignment> PermissionGroupAssignments { get; set; } // Các nhóm quyền được gán cho role này
     }
 }
