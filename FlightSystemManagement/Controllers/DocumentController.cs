@@ -1,65 +1,110 @@
-using AutoMapper;
 using FlightSystemManagement.DTO;
-using FlightSystemManagement.Entity;
-using Microsoft.AspNetCore.Mvc;
 using FlightSystemManagement.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FlightSystemManagement.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DocumentController : ControllerBase
+    public class DocumentsController : ControllerBase
     {
         private readonly IDocumentService _documentService;
-        private readonly IFlightService _flightService;
-        private readonly IMapper _mapper;
 
-        public DocumentController(IDocumentService documentService, IFlightService flightService, IMapper mapper)
+        public DocumentsController(IDocumentService documentService)
         {
             _documentService = documentService;
-            _flightService = flightService;
-            _mapper = mapper;
         }
 
-        [HttpPost("CreateDocument")]
-        public async Task<IActionResult> CreateDocument(int flightId, [FromBody] DocumentCreateDto documentDto)
+        // Create a new document
+        [HttpPost]
+        [Route("create")]
+        public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto dto, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+
+            // Chỉ chấp nhận file PDF
+            if (!file.FileName.EndsWith(".pdf"))
+            {
+                return BadRequest("Only PDF files are allowed.");
+            }
+
+            // Đường dẫn lưu file PDF
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
+
+            // Tạo thư mục nếu chưa tồn tại
+            if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")))
+            {
+                Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
+            }
+
+            // Lưu file PDF vào thư mục
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // Tạo tài liệu trong cơ sở dữ liệu
+            var document = await _documentService.CreateDocumentAsync(dto, filePath);
+
+            return CreatedAtAction(nameof(GetDocumentById), new { documentId = document.DocumentID }, document);
+        }
+
+      
+
+        // Get a document by ID
+        [HttpGet("{documentId}")]
+        public async Task<IActionResult> GetDocumentById(int documentId)
+        {
+            var document = await _documentService.GetDocumentByIdAsync(documentId);
+            if (document == null)
+                return NotFound();
+            return Ok(document);
+        }
+
+        // Get all documents
+        [HttpGet]
+        public async Task<IActionResult> GetAllDocuments()
+        {
+            var documents = await _documentService.GetAllDocumentsAsync();
+            return Ok(documents);
+        }
+
+        // Update a document
+        [HttpPut("{documentId}")]
+        public async Task<IActionResult> UpdateDocument(int documentId, DocumentUpdateDto dto)
+        {
+            var document = await _documentService.UpdateDocumentAsync(documentId, dto);
+            if (document == null)
+                return NotFound();
+            return Ok(document);
+        }
+
+        // Delete a document
+        [HttpDelete("{documentId}")]
+        public async Task<IActionResult> DeleteDocument(int documentId)
+        {
+            var success = await _documentService.DeleteDocumentAsync(documentId);
+            if (!success)
+                return NotFound();
+            return NoContent();
+        }
+        
+        [HttpPost("flight/{flightId}/add-document")]
+        public async Task<IActionResult> AddDocumentToFlight(int flightId, [FromBody] DocumentCreateDto dto)
         {
             try
             {
-                // Chuyển đổi DocumentCreateDto thành Document entity
-                var document = new Document
-                {
-                    DocumentName = documentDto.DocumentName,
-                    Version = documentDto.Version,
-                    DocumentTypeID = documentDto.DocumentTypeID,
-                    Note = documentDto.Note,
-                   
-                    
-                };
-
-                var createdDocument = await _documentService.CreateDocumentAsync(flightId, document, documentDto.PermissionGroupIds);
-                return Ok(createdDocument);
+                var document = await _documentService.AddDocumentToFlightAsync(flightId, dto);
+                return CreatedAtAction(nameof(GetDocumentById), new { documentId = document.DocumentID }, document);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
         }
-        
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDocument(int id, DocumentCreateDto documentDto)
-        {
-            var document = _mapper.Map<Document>(documentDto);
-            var updatedDocument = await _documentService.UpdateDocumentAsync(id, document);
-
-            if (updatedDocument == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedDocument);
-        }
-
 
     }
 }

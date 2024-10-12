@@ -1,101 +1,103 @@
 using FlightSystemManagement.Data;
 using FlightSystemManagement.DTO;
 using FlightSystemManagement.Entity;
-using FlightSystemManagement.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using FlightSystemManagement.Services.Interfaces;
 
-namespace FlightSystemManagement.Services;
-
-public class FlightService : IFlightService
+namespace FlightSystemManagement.Services
 {
-    private readonly FlightSystemContext _context;
-
-    public FlightService(FlightSystemContext context)
+    public class FlightService : IFlightService
     {
-        _context = context;
-    }
+        private readonly FlightSystemContext _context;
 
-    // Hàm để tạo mới một chuyến bay
-    public async Task<Flight> CreateFlightAsync(FlightCreateDto flightDto)
-    {
-        var flight = new Flight
+        public FlightService(FlightSystemContext context)
         {
-            FlightNumber = flightDto.FlightNumber,
-            Date = flightDto.Date,
-            PointOfLoading = flightDto.PointOfLoading,
-            PointOfUnloading = flightDto.PointOfUnloading
-        };
-
-        _context.Flights.Add(flight);
-        await _context.SaveChangesAsync();
-        return flight;
-    }
-
-    // Hàm để lấy thông tin chi tiết chuyến bay theo ID
-    public async Task<Flight> GetFlightByIdAsync(int id)
-    {
-        return await _context.Flights.FindAsync(id);
-    }
-
-    // Hàm để lấy danh sách các chuyến bay
-    public async Task<IEnumerable<Flight>> GetAllFlightsAsync()
-    {
-        return await _context.Flights.ToListAsync();
-    }
-
-    // Hàm để cập nhật chuyến bay
-    public async Task<Flight> UpdateFlightAsync(Flight flight)
-    {
-        _context.Flights.Update(flight);
-        await _context.SaveChangesAsync();
-        return flight;
-    }
-
-    // Hàm để xóa chuyến bay theo ID
-    public async Task<bool> DeleteFlightAsync(int id)
-    {
-        var flight = await _context.Flights.FindAsync(id);
-        if (flight == null)
-        {
-            return false;
+            _context = context;
         }
 
-        _context.Flights.Remove(flight);
-        await _context.SaveChangesAsync();
-        return true;
-    }
-    
-    public async Task<bool> IsFlightCompletedAsync(int flightId)
-    {
-        var flight = await _context.Flights.FindAsync(flightId);
-        return flight?.IsFlightCompleted ?? false; // Trả về true nếu chuyến bay đã kết thúc
-    }
-    
-    public async Task<bool> AddDocumentToFlightAsync(int flightId, Document document)
-    {
-        // Tìm chuyến bay theo flightId
-        var flight = await _context.Flights.FirstOrDefaultAsync(f => f.FlightID == flightId);
-
-        if (flight == null)
+        // CREATE Flight
+        public async Task<Flight> CreateFlightAsync(FlightCreateDto dto)
         {
-            throw new Exception("Flight not found");
+            var flight = new Flight
+            {
+                FlightNumber = dto.FlightNumber,
+                DepartureDate = dto.DepartureDate,
+                PointOfLoading = dto.PointOfLoading,
+                PointOfUnloading = dto.PointOfUnloading,
+                IsFlightCompleted = false,
+                TotalDocuments = 0
+            };
+
+            _context.Flights.Add(flight);
+            await _context.SaveChangesAsync();
+            return flight;
         }
 
-        // Kiểm tra nếu chuyến bay đã kết thúc
-        if (flight.IsFlightCompleted)
+        // READ Flight by ID
+        public async Task<Flight> GetFlightByIdAsync(int flightId)
         {
-            throw new Exception("Cannot add documents to a completed flight");
+            return await _context.Flights
+                .Include(f => f.FlightDocuments)
+                .FirstOrDefaultAsync(f => f.FlightID == flightId);
         }
 
-        // Nếu chuyến bay chưa kết thúc, thêm tài liệu vào chuyến bay
-        flight.FlightDocuments.Add(new FlightDocument
+        // READ All Flights
+        public async Task<IEnumerable<Flight>> GetAllFlightsAsync()
         {
-            Document = document,
-            Flight = flight
-        });
+            return await _context.Flights
+                .Include(f => f.FlightDocuments)
+                .ToListAsync();
+        }
 
-        await _context.SaveChangesAsync();
-        return true;
+        // UPDATE Flight
+        public async Task<Flight> UpdateFlightAsync(int flightId, FlightCreateDto dto)
+        {
+            var flight = await _context.Flights.FirstOrDefaultAsync(f => f.FlightID == flightId);
+            if (flight == null) return null;
+
+            flight.FlightNumber = dto.FlightNumber;
+            flight.DepartureDate = dto.DepartureDate;
+            flight.PointOfLoading = dto.PointOfLoading;
+            flight.PointOfUnloading = dto.PointOfUnloading;
+
+            _context.Flights.Update(flight);
+            await _context.SaveChangesAsync();
+            return flight;
+        }
+
+        // DELETE Flight
+        public async Task<bool> DeleteFlightAsync(int flightId)
+        {
+            var flight = await _context.Flights.FirstOrDefaultAsync(f => f.FlightID == flightId);
+            if (flight == null) return false;
+
+            _context.Flights.Remove(flight);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        
+        public async Task AddDocumentToFlight(int flightId, DocumentCreateDto documentDto)
+        {
+            var flight = await _context.Flights.FirstOrDefaultAsync(f => f.FlightID == flightId);
+            if (flight != null && !flight.IsFlightCompleted)
+            {
+                var document = new Document
+                {
+                    Title = documentDto.Title,
+                   
+                };
+
+                _context.Documents.Add(document);
+                await _context.SaveChangesAsync();
+
+                // Cập nhật số lượng tài liệu
+                flight.TotalDocuments += 1;
+                _context.Flights.Update(flight);
+                await _context.SaveChangesAsync();
+            }
+        }
+
     }
-
 }

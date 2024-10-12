@@ -1,11 +1,13 @@
 using FlightSystemManagement.DTO;
 using FlightSystemManagement.Entity;
-using FlightSystemManagement.Services.Interfaces;
+using FlightSystemManagement.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using FlightSystemManagement.Services.Interfaces;
 
-namespace FlightSystemManagement.Controllers;
-
- [ApiController]
+namespace FlightSystemManagement.Controllers
+{
+    [ApiController]
     [Route("api/[controller]")]
     public class FlightController : ControllerBase
     {
@@ -16,16 +18,20 @@ namespace FlightSystemManagement.Controllers;
             _flightService = flightService;
         }
 
-        // API để tạo mới chuyến bay
+        // CREATE Flight
         [HttpPost]
-        public async Task<IActionResult> CreateFlight(FlightCreateDto flightDto)
+        public async Task<IActionResult> CreateFlight([FromBody] FlightCreateDto dto)
         {
-            var flight = await _flightService.CreateFlightAsync(flightDto);
-            return CreatedAtAction(nameof(GetFlightById), new { id = flight.FlightID }, flight);
-        }
-        
+            var flight = await _flightService.CreateFlightAsync(dto);
+            if (flight == null)
+            {
+                return BadRequest("Failed to create flight.");
+            }
 
-        // API để lấy thông tin chuyến bay theo ID
+            return Ok(flight);
+        }
+
+        // READ Flight by ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetFlightById(int id)
         {
@@ -34,10 +40,11 @@ namespace FlightSystemManagement.Controllers;
             {
                 return NotFound();
             }
+
             return Ok(flight);
         }
 
-        // API để lấy danh sách các chuyến bay
+        // READ All Flights
         [HttpGet]
         public async Task<IActionResult> GetAllFlights()
         {
@@ -45,47 +52,30 @@ namespace FlightSystemManagement.Controllers;
             return Ok(flights);
         }
 
-        // API để cập nhật chuyến bay
+        // UPDATE Flight
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFlight(int id, [FromBody] Flight flight)
+        public async Task<IActionResult> UpdateFlight(int id, [FromBody] FlightCreateDto dto)
         {
-            if (id != flight.FlightID)
+            var updatedFlight = await _flightService.UpdateFlightAsync(id, dto);
+            if (updatedFlight == null)
             {
-                return BadRequest("Flight ID mismatch");
+                return NotFound("Flight not found.");
             }
 
-            var updatedFlight = await _flightService.UpdateFlightAsync(flight);
             return Ok(updatedFlight);
         }
 
-        // API để xóa chuyến bay
+        // DELETE Flight
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFlight(int id)
         {
             var result = await _flightService.DeleteFlightAsync(id);
             if (!result)
             {
-                return NotFound();
+                return NotFound("Flight not found.");
             }
 
             return NoContent();
         }
-        
-        [HttpGet("details/{id}")]
-        public async Task<IActionResult> GetFlightDetails(int id)
-        {
-            var flight = await _flightService.GetFlightByIdAsync(id);
-            if (flight == null)
-            {
-                return NotFound();
-            }
-
-            // Kiểm tra chuyến bay đã kết thúc chưa
-            var isFlightCompleted = await _flightService.IsFlightCompletedAsync(id);
-            return Ok(new { flight, isFlightCompleted });
-        }
-        
- 
-
-
     }
+}

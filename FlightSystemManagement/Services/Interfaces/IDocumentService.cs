@@ -7,8 +7,12 @@ namespace FlightSystemManagement.Services.Interfaces
 {
     public interface IDocumentService
     {
-        Task<Document> CreateDocumentAsync(int flightId, Document document, List<int> permissionGroupIds);
+        Task<Document> CreateDocumentAsync(DocumentCreateDto dto, string filePath);
+        Task<Document> GetDocumentByIdAsync(int documentId);
+        Task<List<Document>> GetAllDocumentsAsync();
+        Task<Document> UpdateDocumentAsync(int documentId, DocumentUpdateDto dto);
+        Task<bool> DeleteDocumentAsync(int documentId);
         
-        Task<Document> UpdateDocumentAsync(int documentId, Document updatedDocument);
+        Task<Document> AddDocumentToFlightAsync(int flightId, DocumentCreateDto dto);
     }
 }

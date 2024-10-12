@@ -1,17 +1,24 @@
-using FlightSystemManagement.DTO;
 using FlightSystemManagement.Entity;
+using System.Threading.Tasks;
+using FlightSystemManagement.DTO;
 
-namespace FlightSystemManagement.Services.Interfaces;
-
-public interface IFlightService
+namespace FlightSystemManagement.Services.Interfaces
 {
-    //FlightCreateDto
-    Task<Flight> CreateFlightAsync(FlightCreateDto flightCreateDto);
-    Task<Flight> GetFlightByIdAsync(int id);
-    Task<IEnumerable<Flight>> GetAllFlightsAsync();
-    Task<Flight> UpdateFlightAsync(Flight flight);
-    Task<bool> DeleteFlightAsync(int id);
-    Task<bool> IsFlightCompletedAsync(int flightId);
-    
+    public interface IFlightService
+    {
+        // CREATE Flight
+        Task<Flight> CreateFlightAsync(FlightCreateDto dto);
 
+        // READ Flight by ID
+        Task<Flight> GetFlightByIdAsync(int flightId);
+
+        // READ All Flights
+        Task<IEnumerable<Flight>> GetAllFlightsAsync();
+
+        // UPDATE Flight
+        Task<Flight> UpdateFlightAsync(int flightId, FlightCreateDto dto);
+
+        // DELETE Flight
+        Task<bool> DeleteFlightAsync(int flightId);
+    }
 }

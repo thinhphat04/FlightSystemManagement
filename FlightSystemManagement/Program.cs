@@ -43,6 +43,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+//Sử dụng ReferenceHandler.Preserve
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+});
+
 // Đăng ký dịch vụ Controller để hỗ trợ API
 builder.Services.AddControllers();
 

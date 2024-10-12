@@ -48,7 +48,6 @@ namespace FlightSystemManagement.Controllers
                 Email = registerDto.Email,
                 PasswordHash = registerDto.Password,
                 FullName = registerDto.FullName,
-                PhoneNumber = registerDto.PhoneNumber
             };
 
             try
