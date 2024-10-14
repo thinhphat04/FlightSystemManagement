@@ -1,6 +1,8 @@
 # Flight Document Management System (FDMS)
-![ALTA SOFTWARE](Docs/logo.png)
 
+<p align="center">
+  <img src="Docs/Logo-Alta-Software.png" alt="ALTA SOFTWARE" width="400"/>
+</p>
 
 ## Giới thiệu
 
