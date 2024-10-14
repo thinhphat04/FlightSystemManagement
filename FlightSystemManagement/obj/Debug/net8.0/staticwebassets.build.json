@@ -1,11 +1,39 @@
 {
   "Version": 1,
-  "Hash": "Gcp+oets9/vvHm5e3aBybuHDHJqjGCxNJc8HdTDLIP8=",
+  "Hash": "LMALzPpbA2ZzhNTfQrQI79D1Uzf4frQjX1yJyxu7pAo=",
   "Source": "FlightSystemManagement",
   "BasePath": "_content/FlightSystemManagement",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "FlightSystemManagement/wwwroot",
+      "Source": "FlightSystemManagement",
+      "ContentRoot": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/",
+      "BasePath": "_content/FlightSystemManagement",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/CV_NgoThinhPhat_BackEndDeveloper_VN.pdf",
+      "SourceId": "FlightSystemManagement",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/",
+      "BasePath": "_content/FlightSystemManagement",
+      "RelativePath": "uploads/CV_NgoThinhPhat_BackEndDeveloper_VN.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/CV_NgoThinhPhat_BackEndDeveloper_VN.pdf"
+    }
+  ]
 }

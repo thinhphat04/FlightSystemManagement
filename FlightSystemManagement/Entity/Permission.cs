@@ -11,6 +11,7 @@ namespace FlightSystemManagement.Entity
     
         public bool CanView { get; set; }
         public bool CanEdit { get; set; }
+        public bool CanDownload { get; set; }
     }
 
 }
