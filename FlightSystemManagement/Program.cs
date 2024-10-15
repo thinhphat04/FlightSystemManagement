@@ -1,5 +1,6 @@
 using System.Text;
 using FlightSystemManagement.Data;
+using FlightSystemManagement.Middleware;
 using FlightSystemManagement.Services;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,7 +12,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Thêm các dịch vụ vào container
 // Hỗ trợ Swagger/OpenAPI cho tài liệu hóa và kiểm thử API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyCors",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000")
+                .AllowAnyMethod() // Allow any HTTP method
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+});
+
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -50,7 +65,6 @@ builder.Services.AddSwaggerGen(c =>
 
 // Đăng ký dịch vụ Controller để hỗ trợ API
 builder.Services.AddControllers();
-
 // Đăng ký dịch vụ IUserService với triển khai UserService, sử dụng Dependency Injection (DI)
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
@@ -81,7 +95,7 @@ var app = builder.Build();
 
 
 
-
+app.UseMiddleware<ExceptionMiddleware>();
 // Thiết lập HTTP request pipeline (các bước xử lý yêu cầu HTTP)
 if (app.Environment.IsDevelopment())
 {
@@ -92,11 +106,11 @@ if (app.Environment.IsDevelopment())
 
 // Chuyển hướng tất cả các yêu cầu HTTP sang HTTPS
 app.UseHttpsRedirection();
+app.UseCors("MyCors");
 
 // Bật tính năng xác thực và phân quyền
 app.UseAuthentication(); // Kiểm tra xác thực bằng JWT
 app.UseAuthorization(); // Kiểm tra quyền truy cập
-
 // Định tuyến yêu cầu đến các controller
 app.MapControllers();
 

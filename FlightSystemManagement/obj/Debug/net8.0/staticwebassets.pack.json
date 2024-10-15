@@ -1,0 +1,25 @@
+{
+  "Files": [
+    {
+      "Id": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/CV_NgoThinhPhat_BackEndDeveloper_VN.pdf",
+      "PackagePath": "staticwebassets/uploads/CV_NgoThinhPhat_BackEndDeveloper_VN.pdf"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.FlightSystemManagement.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.FlightSystemManagement.props",
+      "PackagePath": "build\\FlightSystemManagement.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.FlightSystemManagement.props",
+      "PackagePath": "buildMultiTargeting\\FlightSystemManagement.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.FlightSystemManagement.props",
+      "PackagePath": "buildTransitive\\FlightSystemManagement.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
