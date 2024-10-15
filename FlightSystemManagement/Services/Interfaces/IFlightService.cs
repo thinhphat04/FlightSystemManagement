@@ -20,5 +20,8 @@ namespace FlightSystemManagement.Services.Interfaces
 
         // DELETE Flight
         Task<bool> DeleteFlightAsync(int flightId);
+        
+        // Add document to flight
+        Task<bool> AddDocumentToFlight(int flightId, int documentId);
     }
 }

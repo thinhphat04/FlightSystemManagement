@@ -77,5 +77,24 @@ namespace FlightSystemManagement.Controllers
 
             return NoContent();
         }
+        
+        [HttpPost("{flightId}/documents/{documentId}")]
+        public async Task<IActionResult> AddDocumentToFlight(int flightId, int documentId)
+        {
+            try
+            {
+                var result = await _flightService.AddDocumentToFlight(flightId, documentId);
+                if (result)
+                {
+                    return Ok("Tài liệu đã được thêm vào chuyến bay thành công.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return BadRequest("Không thể thêm tài liệu vào chuyến bay.");
+        }
     }
 }
