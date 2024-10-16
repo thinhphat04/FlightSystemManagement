@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "LMALzPpbA2ZzhNTfQrQI79D1Uzf4frQjX1yJyxu7pAo=",
+  "Hash": "pRrDq5z53Fsjh5VcEpKSTFkPn45bMwlP5RXUa5bAS7U=",
   "Source": "FlightSystemManagement",
   "BasePath": "_content/FlightSystemManagement",
   "Mode": "Default",
@@ -16,6 +16,25 @@
     }
   ],
   "Assets": [
+    {
+      "Identity": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/BangDiem_NgoThinhPhat.pdf",
+      "SourceId": "FlightSystemManagement",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/",
+      "BasePath": "_content/FlightSystemManagement",
+      "RelativePath": "uploads/BangDiem_NgoThinhPhat.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/BangDiem_NgoThinhPhat.pdf"
+    },
     {
       "Identity": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/CV_NgoThinhPhat_BackEndDeveloper_VN.pdf",
       "SourceId": "FlightSystemManagement",

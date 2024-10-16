@@ -1,6 +1,10 @@
 {
   "Files": [
     {
+      "Id": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/BangDiem_NgoThinhPhat.pdf",
+      "PackagePath": "staticwebassets/uploads/BangDiem_NgoThinhPhat.pdf"
+    },
+    {
       "Id": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/CV_NgoThinhPhat_BackEndDeveloper_VN.pdf",
       "PackagePath": "staticwebassets/uploads/CV_NgoThinhPhat_BackEndDeveloper_VN.pdf"
     },

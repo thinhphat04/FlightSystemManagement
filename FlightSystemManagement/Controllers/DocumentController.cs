@@ -27,13 +27,16 @@ namespace FlightSystemManagement.Controllers
                     return BadRequest("No file uploaded.");
                 }
 
-                // Chỉ chấp nhận file PDF
-                if (!file.FileName.EndsWith(".pdf"))
+                // Chỉ chấp nhận file PDF và DOCX
+                var allowedExtensions = new[] { ".pdf", ".docx" };
+                var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(fileExtension))
                 {
-                    return BadRequest("Only PDF files are allowed.");
+                    return BadRequest("Only PDF and DOCX files are allowed.");
                 }
 
-                // Đường dẫn lưu file PDF
+                // Đường dẫn lưu file
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
 
                 // Tạo thư mục nếu chưa tồn tại
@@ -42,7 +45,7 @@ namespace FlightSystemManagement.Controllers
                     Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
                 }
 
-                // Lưu file PDF vào thư mục
+                // Lưu file vào thư mục
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);

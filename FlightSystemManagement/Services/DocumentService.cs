@@ -22,8 +22,6 @@ namespace FlightSystemManagement.Services
             {
                 Title = dto.Title,
                 Type = dto.Type,
-                CreatedDate = dto.CreateDate,
-                Version = dto.Version,
                 CreatorID = dto.CreatorId,
                 Note = dto.Note,
                 FilePath = filePath  // Đường dẫn file PDF được upload
@@ -58,9 +56,26 @@ namespace FlightSystemManagement.Services
             if (document == null)
                 return null;
 
+            // Tách phiên bản hiện tại thành phần integer và decimal
+            var currentVersionParts = document.Version.Split('.');
+
+            if (currentVersionParts.Length == 2 &&
+                int.TryParse(currentVersionParts[0], out int majorVersion) &&
+                int.TryParse(currentVersionParts[1], out int minorVersion))
+            {
+                // Tăng phần số thập phân (minor version) lên 1
+                minorVersion += 1;
+                document.Version = $"{majorVersion}.{minorVersion}";
+            }
+            else
+            {
+                // Nếu không thể tách phiên bản, đặt phiên bản thành 1.1
+                document.Version = "1.1";
+            }
+
+            // Cập nhật các thông tin khác của tài liệu
             document.Title = dto.Title;
             document.Type = dto.Type;
-            document.Version = dto.Version;
             document.Note = dto.Note;
 
             _context.Documents.Update(document);
@@ -98,10 +113,7 @@ namespace FlightSystemManagement.Services
             {
                 Title = dto.Title,
                 Type = dto.Type,
-                CreatedDate = dto.CreateDate,
-                Version = dto.Version,
                 CreatorID = dto.CreatorId,
-                FilePath = dto.FilePath,
                 Note = dto.Note,
             };
 
