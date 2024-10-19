@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using FlightSystemManagement.DTO;
 using FlightSystemManagement.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightSystemManagement.Controllers
@@ -14,54 +16,65 @@ namespace FlightSystemManagement.Controllers
         {
             _documentService = documentService;
         }
-
+        
         // Create a new document
-        [HttpPost]
-        [Route("create")]
-        public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto dto, IFormFile file)
+[Authorize(Roles = "Admin")] // Chỉ cho phép Admin thực hiện
+[HttpPost]
+[Route("create")]
+public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto dto, IFormFile file)
+{
+    try
+    {
+        if (file == null || file.Length == 0)
         {
-            try
-            {
-                if (file == null || file.Length == 0)
-                {
-                    return BadRequest("No file uploaded.");
-                }
-
-                // Chỉ chấp nhận file PDF và DOCX
-                var allowedExtensions = new[] { ".pdf", ".docx" };
-                var fileExtension = Path.GetExtension(file.FileName).ToLower();
-
-                if (!allowedExtensions.Contains(fileExtension))
-                {
-                    return BadRequest("Only PDF and DOCX files are allowed.");
-                }
-
-                // Đường dẫn lưu file
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
-
-                // Tạo thư mục nếu chưa tồn tại
-                if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")))
-                {
-                    Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
-                }
-
-                // Lưu file vào thư mục
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                // Tạo tài liệu trong cơ sở dữ liệu
-                var document = await _documentService.CreateDocumentAsync(dto, filePath);
-
-                return CreatedAtAction(nameof(GetDocumentById), new { documentId = document.DocumentID }, document);
-            }
-            catch (Exception ex)
-            {
-                // Log lỗi tại đây nếu cần
-                return StatusCode(500, new { message = "An error occurred while creating the document.", details = ex.Message });
-            }
+            return BadRequest("No file uploaded.");
         }
+
+        // Chỉ chấp nhận file PDF và DOCX
+        var allowedExtensions = new[] { ".pdf", ".docx" };
+        var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+        if (!allowedExtensions.Contains(fileExtension))
+        {
+            return BadRequest("Only PDF and DOCX files are allowed.");
+        }
+
+        // Đường dẫn lưu file
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
+
+        // Tạo thư mục nếu chưa tồn tại
+        if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")))
+        {
+            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
+        }
+
+        // Lưu file vào thư mục
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        // Lấy CreatorId từ token Bearer
+        var creatorIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+        if (creatorIdClaim == null)
+        {
+            return Unauthorized("User not found.");
+        }
+
+        // Gán CreatorId từ Bearer token thay vì từ phía client
+        int creatorId = int.Parse(creatorIdClaim.Value);
+
+        // Tạo tài liệu trong cơ sở dữ liệu
+        var document = await _documentService.CreateDocumentAsync(dto, filePath, creatorId);
+
+        return CreatedAtAction(nameof(GetDocumentById), new { documentId = document.DocumentID }, document);
+    }
+    catch (Exception ex)
+    {
+        // Log lỗi tại đây nếu cần
+        return StatusCode(500, new { message = "An error occurred while creating the document.", details = ex.Message });
+    }
+}
 
         // Get a document by ID
         [HttpGet("{documentId}")]
@@ -99,11 +112,11 @@ namespace FlightSystemManagement.Controllers
 
         // Update a document
         [HttpPut("{documentId}")]
-        public async Task<IActionResult> UpdateDocument(int documentId, DocumentUpdateDto dto)
+        public async Task<IActionResult> UpdateDocument(int documentId, DocumentUpdateDto dto, IFormFile file)
         {
             try
             {
-                var document = await _documentService.UpdateDocumentAsync(documentId, dto);
+                var document = await _documentService.UpdateDocumentAsync(documentId, dto, file);
                 if (document == null)
                     return NotFound();
                 return Ok(document);

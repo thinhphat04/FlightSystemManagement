@@ -46,11 +46,13 @@ namespace FlightSystemManagement.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Version")
                         .IsRequired()
@@ -76,18 +78,21 @@ namespace FlightSystemManagement.Migrations
 
                     b.Property<string>("FlightNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsFlightCompleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("PointOfLoading")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("PointOfUnloading")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<int>("TotalDocuments")
                         .HasColumnType("int");
@@ -172,23 +177,6 @@ namespace FlightSystemManagement.Migrations
                     b.ToTable("PermissionGroups");
                 });
 
-            modelBuilder.Entity("FlightSystemManagement.Entity.Role", b =>
-                {
-                    b.Property<int>("RoleID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleID"));
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("RoleID");
-
-                    b.ToTable("Roles");
-                });
-
             modelBuilder.Entity("FlightSystemManagement.Entity.User", b =>
                 {
                     b.Property<int>("UserID")
@@ -202,13 +190,25 @@ namespace FlightSystemManagement.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefreshToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -219,21 +219,6 @@ namespace FlightSystemManagement.Migrations
                     b.HasKey("UserID");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("FlightSystemManagement.Entity.UserRole", b =>
-                {
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoleID")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserID", "RoleID");
-
-                    b.HasIndex("RoleID");
-
-                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("FlightSystemManagement.Entity.Document", b =>
@@ -285,25 +270,6 @@ namespace FlightSystemManagement.Migrations
                     b.Navigation("PermissionGroup");
                 });
 
-            modelBuilder.Entity("FlightSystemManagement.Entity.UserRole", b =>
-                {
-                    b.HasOne("FlightSystemManagement.Entity.Role", "Role")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("RoleID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FlightSystemManagement.Entity.User", "User")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("FlightSystemManagement.Entity.Document", b =>
                 {
                     b.Navigation("FlightDocuments");
@@ -319,16 +285,6 @@ namespace FlightSystemManagement.Migrations
             modelBuilder.Entity("FlightSystemManagement.Entity.PermissionGroup", b =>
                 {
                     b.Navigation("Permissions");
-                });
-
-            modelBuilder.Entity("FlightSystemManagement.Entity.Role", b =>
-                {
-                    b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("FlightSystemManagement.Entity.User", b =>
-                {
-                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

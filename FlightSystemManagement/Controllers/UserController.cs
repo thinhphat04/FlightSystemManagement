@@ -5,6 +5,7 @@ using FlightSystemManagement.Entity;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using FlightSystemManagement.DTO;
+using FlightSystemManagement.Services;
 using Microsoft.IdentityModel.Tokens;
 
 namespace FlightSystemManagement.Controllers
@@ -15,11 +16,13 @@ namespace FlightSystemManagement.Controllers
     {
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
+        private readonly ITokenService _tokenService;
 
-        public UserController(IUserService userService, IConfiguration configuration)
+        public UserController(IUserService userService, IConfiguration configuration, ITokenService tokenService)
         {
             _userService = userService;
             _configuration = configuration;
+            _tokenService = tokenService;
         }
 
         // Lấy danh sách tất cả người dùng
@@ -64,6 +67,9 @@ namespace FlightSystemManagement.Controllers
                     Email = registerDto.Email,
                     PasswordHash = registerDto.Password,
                     FullName = registerDto.FullName,
+                    Role = "User",
+                    RefreshToken = _tokenService.CreateRefreshToken(), // Tạo refresh token
+                    RefreshTokenExpiryTime = DateTime.Now.AddDays(7)
                 };
 
                 var createdUser = await _userService.CreateUserAsync(user);
@@ -95,51 +101,58 @@ namespace FlightSystemManagement.Controllers
             }
         }
 
-        // Đăng nhập người dùng loginDto
+        // Đăng nhập người dùng
         [HttpPost("login")]
         public async Task<IActionResult> Authenticate([FromBody] LoginDto loginDto)
         {
-            try
+            var user = await _userService.AuthenticateAsync(loginDto.Email, loginDto.Password);
+            if (user == null)
+                return Unauthorized("Invalid credentials or incorrect email domain.");
+
+            // Tạo access token
+            var accessToken = _tokenService.CreateAccessToken(user);
+
+            // Tạo refresh token
+            var refreshToken = _tokenService.CreateRefreshToken();
+            await _userService.SaveRefreshTokenAsync(user.UserID, refreshToken);
+
+            return Ok(new
             {
-                var user = await _userService.AuthenticateAsync(loginDto.Email, loginDto.Password);
-                if (user == null) return Unauthorized();
-
-                // Generate JWT token
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
-
-                // Get user roles
-                var userRoles = await _userService.GetUserRolesAsync(user.UserID);
-
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString())
-                };
-
-                // Add roles to the claims
-                foreach (var role in userRoles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role.RoleName));
-                }
-
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(claims),
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-                        SecurityAlgorithms.HmacSha256Signature)
-                };
-
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = tokenHandler.WriteToken(token);
-
-                return Ok(new { Token = tokenString });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while authenticating the user.", details = ex.Message });
-            }
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+            });
         }
+
+        
+        // Làm mới Access Token
+        // [HttpPost("refresh-token")]
+        // public async Task<IActionResult> RefreshToken([FromBody] TokenDto tokenDto)
+        // {
+        //     var principal = _tokenService.GetPrincipalFromExpiredToken(tokenDto.AccessToken);
+        //     var userId = int.Parse(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        //
+        //     var savedRefreshToken = await _userService.GetRefreshTokenAsync(userId); // Lấy Refresh Token đã lưu trong hệ thống
+        //
+        //     if (savedRefreshToken != tokenDto.RefreshToken)
+        //     {
+        //         return Unauthorized("Invalid refresh token");
+        //     }
+        //
+        //     // Tạo Access Token mới
+        //     var user = await _userService.GetUserByIdAsync(userId);
+        //     var roles = await _userService.
+        //     var newAccessToken = _tokenService.CreateAccessToken(user, roles);
+        //     var newRefreshToken = _tokenService.CreateRefreshToken();
+        //
+        //     // Lưu Refresh Token mới vào hệ thống
+        //     await _userService.SaveRefreshTokenAsync(user.UserID, newRefreshToken);
+        //
+        //     return Ok(new
+        //     {
+        //         AccessToken = newAccessToken,
+        //         RefreshToken = newRefreshToken
+        //     });
+        // }
+
     }
 }

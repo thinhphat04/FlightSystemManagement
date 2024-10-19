@@ -1,107 +1,129 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using FlightSystemManagement.Data;
 using FlightSystemManagement.Entity;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FlightSystemManagement.Services
 {
     public class UserService : IUserService
+{
+    private readonly FlightSystemContext _context;
+    private readonly IConfiguration _configuration;
+
+    public UserService(FlightSystemContext context, IConfiguration configuration)
     {
-        private readonly FlightSystemContext _context;
-        
-        
-
-        public UserService(FlightSystemContext context)
+        _context = context;
+        _configuration = configuration;
+    }
+    // xử lý đăng nhập
+    public async Task<User> AuthenticateAsync(string email, string password)
+    {
+        if (!email.EndsWith("@vietjetair.com", StringComparison.OrdinalIgnoreCase))
         {
-            _context = context;
-            
+            return null;
+        }
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
+        if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)) return null;
+
+        return user;
+    }
+    // Tạo token
+    public async Task<string> GenerateJwtToken(User user)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role) // Use role directly
+        };
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddHours(1),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
+    // Lấy danh sách người dùng
+    public async Task<IEnumerable<User>> GetUsersAsync()
+    {
+        return await _context.Users.ToListAsync();
+    }
+    // Lấy thông tin người dùng theo ID
+    public async Task<User> GetUserByIdAsync(int id)
+    {
+        return await _context.Users.SingleOrDefaultAsync(u => u.UserID == id);
+    }
+    // Tạo người dùng mới
+    public async Task<User> CreateUserAsync(User user)
+    {
+        // Kiểm tra nếu email không thuộc miền vietjetair.com
+        if (!user.Email.EndsWith("@vietjetair.com", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Email must belong to the 'vietjetair.com' domain.");
         }
 
-        public async Task<User> AuthenticateAsync(string email, string password)
+        // Hash the password before saving
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    // Xóa người dùng
+    public async Task<bool> DeleteUserAsync(int id)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return false;
+
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    // Role Checks
+    public bool IsAdmin(User user)
+    {
+        return user.Role == "Admin";
+    }
+
+    public bool IsPilot(User user)
+    {
+        return user.Role == "Pilot";
+    }
+
+    public bool IsCrew(User user)
+    {
+        return user.Role == "Crew";
+    }
+    // Lưu Refresh Token
+    public async Task SaveRefreshTokenAsync(int userId, string refreshToken)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user != null)
         {
-            // Kiểm tra email thuộc domain VietjetAir
-            if (!email.EndsWith("@vietjetair.com", StringComparison.OrdinalIgnoreCase))
-            {
-                return null;
-            }
-
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)) return null;
-
-            // Load roles for the user
-            var userRoles = await _context.UserRoles
-                .Where(ur => ur.UserID == user.UserID)
-                .Select(ur => ur.Role.RoleName)
-                .ToListAsync();
-
-            // Attach roles to user for further use
-            user.UserRoles = userRoles.Select(roleName => new UserRole { UserID = user.UserID, Role = new Role { RoleName = roleName } }).ToList();
-
-            return user;
-        }
-
-        public async Task<IEnumerable<User>> GetUsersAsync()
-        {
-            return await _context.Users.Include(u => u.UserRoles).ThenInclude(ur => ur.Role).ToListAsync();
-        }
-
-        public async Task<User> GetUserByIdAsync(int id)
-        {
-            return await _context.Users.Include(u => u.UserRoles).ThenInclude(ur => ur.Role).SingleOrDefaultAsync(u => u.UserID == id);
-        }
-
-        public async Task<User> CreateUserAsync(User user)
-        {
-            // Kiểm tra email thuộc domain VietjetAir
-            if (!user.Email.EndsWith("@vietjetair.com", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ArgumentException("Email must belong to the 'vietjetair.com' domain.");
-            }
-
-            // Hash the password before saving
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
-
-            _context.Users.Add(user);
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
             await _context.SaveChangesAsync();
-
-            return user;
-        }
-
-        public async Task<bool> DeleteUserAsync(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return false;
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public bool IsAdmin(int userId)
-        {
-            return _context.UserRoles.Any(ur => ur.UserID == userId && ur.Role.RoleName == "Admin");
-        }
-
-        public bool IsBackOffice(int userId)
-        {
-            return _context.UserRoles.Any(ur => ur.UserID == userId && ur.Role.RoleName == "BackOffice");
-        }
-
-        public bool IsPilotOrCabinCrew(int userId)
-        {
-            return _context.UserRoles.Any(ur => ur.UserID == userId && 
-                (ur.Role.RoleName == "Pilot" || ur.Role.RoleName == "CabinCrew"));
-        }
-        
-        public async Task<List<Role>> GetUserRolesAsync(int userId)
-        {
-            var userRoles = await _context.UserRoles
-                .Where(ur => ur.UserID == userId)
-                .Include(ur => ur.Role) // Load the Role navigation property
-                .Select(ur => ur.Role)
-                .ToListAsync();
-
-            return userRoles;
         }
     }
+    // Lấy Refresh Token
+    public async Task<string> GetRefreshTokenAsync(int userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        return user?.RefreshToken;
+    }
+}
+
 }

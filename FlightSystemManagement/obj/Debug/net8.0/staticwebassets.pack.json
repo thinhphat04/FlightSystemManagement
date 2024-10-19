@@ -1,6 +1,10 @@
 {
   "Files": [
     {
+      "Id": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/AS_FlightDocs_BRD_v1.0.docx",
+      "PackagePath": "staticwebassets/uploads/AS_FlightDocs_BRD_v1.0.docx"
+    },
+    {
       "Id": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/BangDiem_NgoThinhPhat.pdf",
       "PackagePath": "staticwebassets/uploads/BangDiem_NgoThinhPhat.pdf"
     },

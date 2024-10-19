@@ -12,17 +12,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Thêm các dịch vụ vào container
 // Hỗ trợ Swagger/OpenAPI cho tài liệu hóa và kiểm thử API
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("MyCors",
-        builder =>
-        {
-            builder.WithOrigins("http://localhost:3000")
-                .AllowAnyMethod() // Allow any HTTP method
-                .AllowAnyHeader()
-                .AllowCredentials();
-        });
-});
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("MyCors",
+//         builder =>
+//         {
+//             builder.WithOrigins("http://localhost:3000")
+//                 .AllowAnyMethod() // Allow any HTTP method
+//                 .AllowAnyHeader()
+//                 .AllowCredentials();
+//         });
+// });
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -70,6 +70,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 // Cấu hình xác thực JWT (JSON Web Token) cho ứng dụng
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -82,7 +83,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true, // Kiểm tra thời hạn token
             ValidateIssuerSigningKey = true, // Kiểm tra khóa ký token
             ValidIssuer = builder.Configuration["Jwt:Issuer"], // Issuer hợp lệ, lấy từ cấu hình
-            ValidAudience = builder.Configuration["Jwt:Issuer"], // Audience hợp lệ, lấy từ cấu hình
+            ValidAudience = builder.Configuration["Jwt:Audience"], // Audience hợp lệ, lấy từ cấu hình
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) // Khóa ký token, lấy từ cấu hình
         };
     });
@@ -106,7 +107,7 @@ if (app.Environment.IsDevelopment())
 
 // Chuyển hướng tất cả các yêu cầu HTTP sang HTTPS
 app.UseHttpsRedirection();
-app.UseCors("MyCors");
+// app.UseCors("MyCors");
 
 // Bật tính năng xác thực và phân quyền
 app.UseAuthentication(); // Kiểm tra xác thực bằng JWT

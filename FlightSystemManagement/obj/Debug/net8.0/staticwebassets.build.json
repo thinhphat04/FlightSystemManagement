@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "pRrDq5z53Fsjh5VcEpKSTFkPn45bMwlP5RXUa5bAS7U=",
+  "Hash": "Le9NidHFqWlaZRe9MsAOiUFq6L24B4d/ZI63Byg3Qmc=",
   "Source": "FlightSystemManagement",
   "BasePath": "_content/FlightSystemManagement",
   "Mode": "Default",
@@ -16,6 +16,25 @@
     }
   ],
   "Assets": [
+    {
+      "Identity": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/AS_FlightDocs_BRD_v1.0.docx",
+      "SourceId": "FlightSystemManagement",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/",
+      "BasePath": "_content/FlightSystemManagement",
+      "RelativePath": "uploads/AS_FlightDocs_BRD_v1.0.docx",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/AS_FlightDocs_BRD_v1.0.docx"
+    },
     {
       "Identity": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/BangDiem_NgoThinhPhat.pdf",
       "SourceId": "FlightSystemManagement",
