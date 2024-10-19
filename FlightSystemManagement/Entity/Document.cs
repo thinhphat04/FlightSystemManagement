@@ -9,7 +9,6 @@ namespace FlightSystemManagement.Entity
         public string Version { get; set; } = "1.0"; // Default version
         public int CreatorID { get; set; }
         public string Note { get; set; }
-        public User Creator { get; set; }
         public string FilePath { get; set; } // For uploaded file
         public ICollection<Permission> Permissions { get; set; }
     

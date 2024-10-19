@@ -23,8 +23,9 @@ namespace FlightSystemManagement.Services
                 Title = dto.Title,
                 Type = dto.Type,
                 Note = dto.Note,
-                CreatorID = creatorId,  // Sử dụng CreatorId từ Bearer token
-                FilePath = filePath
+                CreatorID = creatorId,  // Use CreatorID from the Bearer token
+                FilePath = filePath,
+                CreatedDate = DateTime.Now // Assign current date
             };
 
             _context.Documents.Add(document);
@@ -32,91 +33,68 @@ namespace FlightSystemManagement.Services
             return document;
         }
 
-        
-        
         // Get a document by ID
         public async Task<Document> GetDocumentByIdAsync(int documentId)
         {
             return await _context.Documents
-                                 .Include(d => d.Creator)
-                                 .FirstOrDefaultAsync(d => d.DocumentID == documentId);
+                                 .FirstOrDefaultAsync(d => d.DocumentID == documentId);  // No need to include Creator
         }
 
         // Get all documents
         public async Task<List<Document>> GetAllDocumentsAsync()
         {
-            return await _context.Documents
-                                 .Include(d => d.Creator)
-                                 .ToListAsync();
+            return await _context.Documents.ToListAsync();  // No need to include Creator
         }
 
         // Update a document
-      public async Task<Document> UpdateDocumentAsync(int documentId, DocumentUpdateDto dto, IFormFile file)
-{
-    var document = await _context.Documents.FindAsync(documentId);
-    if (document == null)
-        return null;
-
-    // Tách phiên bản hiện tại thành phần integer và decimal
-    var currentVersionParts = document.Version.Split('.');
-
-    if (currentVersionParts.Length == 2 &&
-        int.TryParse(currentVersionParts[0], out int majorVersion) &&
-        int.TryParse(currentVersionParts[1], out int minorVersion))
-    {
-        // Tăng phần số thập phân (minor version) lên 1
-        minorVersion += 1;
-        document.Version = $"{majorVersion}.{minorVersion}";
-    }
-    else
-    {
-        // Nếu không thể tách phiên bản, đặt phiên bản thành 1.1
-        document.Version = "1.1";
-    }
-
-    // Cập nhật các thông tin khác của tài liệu
-    document.Title = dto.Title;
-    document.Type = dto.Type;
-    document.Note = dto.Note;
-
-    // Kiểm tra nếu có file mới được tải lên
-    if (file != null && file.Length > 0)
-    {
-        // Chỉ chấp nhận file pdf và docx
-        if (!file.FileName.EndsWith(".pdf") && !file.FileName.EndsWith(".docx"))
+        public async Task<Document> UpdateDocumentAsync(int documentId, DocumentUpdateDto dto, IFormFile file)
         {
-            throw new Exception("Only PDF and DOCX files are allowed.");
+            var document = await _context.Documents.FindAsync(documentId);
+            if (document == null)
+                return null;
+
+            // Increment document version
+            var currentVersionParts = document.Version.Split('.');
+            if (currentVersionParts.Length == 2 &&
+                int.TryParse(currentVersionParts[0], out int majorVersion) &&
+                int.TryParse(currentVersionParts[1], out int minorVersion))
+            {
+                minorVersion += 1;
+                document.Version = $"{majorVersion}.{minorVersion}";
+            }
+            else
+            {
+                document.Version = "1.1";
+            }
+
+            // Update document properties
+            document.Title = dto.Title;
+            document.Type = dto.Type;
+            document.Note = dto.Note;
+
+            // Handle file updates
+            if (file != null && file.Length > 0)
+            {
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
+                if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")))
+                {
+                    Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
+                }
+                if (!string.IsNullOrEmpty(document.FilePath) && File.Exists(document.FilePath))
+                {
+                    File.Delete(document.FilePath);
+                }
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                document.FilePath = filePath;
+            }
+
+            _context.Documents.Update(document);
+            await _context.SaveChangesAsync();
+            return document;
         }
-
-        // Đường dẫn lưu file mới
-        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
-
-        // Tạo thư mục nếu chưa tồn tại
-        if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")))
-        {
-            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
-        }
-
-        // Xóa file cũ nếu cần thiết (tùy vào yêu cầu)
-        if (!string.IsNullOrEmpty(document.FilePath) && File.Exists(document.FilePath))
-        {
-            File.Delete(document.FilePath);
-        }
-
-        // Lưu file mới
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream);
-        }
-
-        // Cập nhật đường dẫn file mới trong cơ sở dữ liệu
-        document.FilePath = filePath;
-    }
-
-    _context.Documents.Update(document);
-    await _context.SaveChangesAsync();
-    return document;
-}
 
         // Delete a document
         public async Task<bool> DeleteDocumentAsync(int documentId)
@@ -129,33 +107,30 @@ namespace FlightSystemManagement.Services
             await _context.SaveChangesAsync();
             return true;
         }
-        
+
+        // Add document to a flight
         public async Task<Document> AddDocumentToFlightAsync(int flightId, DocumentCreateDto dto)
         {
-            // Lấy chuyến bay từ database
             var flight = await _context.Flights
                 .Include(f => f.FlightDocuments)
                 .FirstOrDefaultAsync(f => f.FlightID == flightId);
 
-            // Kiểm tra nếu chuyến bay không tồn tại hoặc đã hoàn tất
             if (flight == null || flight.IsFlightCompleted)
             {
-                throw new InvalidOperationException("Chuyến bay không tồn tại hoặc đã hoàn tất, không thể thêm tài liệu.");
+                throw new InvalidOperationException("Flight does not exist or is already completed.");
             }
 
-            // Tạo tài liệu mới từ DTO
             var document = new Document
             {
                 Title = dto.Title,
                 Type = dto.Type,
                 Note = dto.Note,
+                CreatedDate = DateTime.Now
             };
 
-            // Thêm tài liệu vào hệ thống
             _context.Documents.Add(document);
             await _context.SaveChangesAsync();
 
-            // Tạo liên kết tài liệu với chuyến bay
             var flightDocument = new FlightDocument
             {
                 FlightID = flight.FlightID,
@@ -168,6 +143,5 @@ namespace FlightSystemManagement.Services
 
             return document;
         }
-
     }
 }
