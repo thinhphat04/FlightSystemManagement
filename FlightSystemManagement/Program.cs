@@ -12,17 +12,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Thêm các dịch vụ vào container
 // Hỗ trợ Swagger/OpenAPI cho tài liệu hóa và kiểm thử API
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy("MyCors",
-//         builder =>
-//         {
-//             builder.WithOrigins("http://localhost:3000")
-//                 .AllowAnyMethod() // Allow any HTTP method
-//                 .AllowAnyHeader()
-//                 .AllowCredentials();
-//         });
-// });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyCors",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000")
+                .AllowAnyMethod() // Allow any HTTP method
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+});
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -93,9 +93,6 @@ builder.Services.AddDbContext<FlightSystemContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnection"))); // Lấy chuỗi kết nối từ appsettings.json
 
 var app = builder.Build();
-
-
-
 app.UseMiddleware<ExceptionMiddleware>();
 // Thiết lập HTTP request pipeline (các bước xử lý yêu cầu HTTP)
 if (app.Environment.IsDevelopment())
@@ -107,7 +104,7 @@ if (app.Environment.IsDevelopment())
 
 // Chuyển hướng tất cả các yêu cầu HTTP sang HTTPS
 app.UseHttpsRedirection();
-// app.UseCors("MyCors");
+app.UseCors("MyCors");
 
 // Bật tính năng xác thực và phân quyền
 app.UseAuthentication(); // Kiểm tra xác thực bằng JWT

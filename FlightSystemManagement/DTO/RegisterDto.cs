@@ -1,9 +1,18 @@
-namespace FlightSystemManagement.DTO;
+using System.ComponentModel.DataAnnotations;
 
-public class RegisterDto
+namespace FlightSystemManagement.DTO
 {
-    public string Email { get; set; }
-    public string Password { get; set; }
-    public string FullName { get; set; }
-    
+    public class RegisterDto
+    {
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Password is required.")]
+        [MinLength(6, ErrorMessage = "Password must be at least 6 characters long.")]
+        public string Password { get; set; }
+
+        [Required(ErrorMessage = "Full name is required.")]
+        public string FullName { get; set; }
+    }
 }

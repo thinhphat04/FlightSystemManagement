@@ -18,65 +18,33 @@ namespace FlightSystemManagement.Controllers
         }
         
         // Create a new document
-[Authorize(Roles = "Admin")] // Chỉ cho phép Admin thực hiện
-[HttpPost]
-[Route("create")]
-public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto dto, IFormFile file)
-{
-    try
-    {
-        if (file == null || file.Length == 0)
+        [Authorize(Roles = "Admin,Back-Office")] // Chỉ Admin và Nhân viên Back-Office được phép tạo tài liệu
+        [HttpPost]
+        [Route("create")]
+        public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto dto, IFormFile file)
         {
-            return BadRequest("No file uploaded.");
+            try
+            {
+                var document = await _documentService.CreateDocumentAsync(dto, file, HttpContext.User);
+                return CreatedAtAction(nameof(GetDocumentById), new { documentId = document.DocumentID }, document);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi tại đây nếu cần
+                return StatusCode(500, new { message = "An error occurred while creating the document.", details = ex.Message });
+            }
         }
-
-        // Chỉ chấp nhận file PDF và DOCX
-        var allowedExtensions = new[] { ".pdf", ".docx" };
-        var fileExtension = Path.GetExtension(file.FileName).ToLower();
-
-        if (!allowedExtensions.Contains(fileExtension))
-        {
-            return BadRequest("Only PDF and DOCX files are allowed.");
-        }
-
-        // Đường dẫn lưu file
-        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
-
-        // Tạo thư mục nếu chưa tồn tại
-        if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")))
-        {
-            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
-        }
-
-        // Lưu file vào thư mục
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream);
-        }
-
-        // Lấy CreatorId từ token Bearer
-        var creatorIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-        if (creatorIdClaim == null)
-        {
-            return Unauthorized("User not found.");
-        }
-
-        // Gán CreatorId từ Bearer token thay vì từ phía client
-        int creatorId = int.Parse(creatorIdClaim.Value);
-
-        // Tạo tài liệu trong cơ sở dữ liệu
-        var document = await _documentService.CreateDocumentAsync(dto, filePath, creatorId);
-
-        return CreatedAtAction(nameof(GetDocumentById), new { documentId = document.DocumentID }, document);
-    }
-    catch (Exception ex)
-    {
-        // Log lỗi tại đây nếu cần
-        return StatusCode(500, new { message = "An error occurred while creating the document.", details = ex.Message });
-    }
-}
 
         // Get a document by ID
+        [Authorize(Roles = "Admin,Pilot,Crew")] // Admin, Phi công, và Tiếp viên đều có thể xem tài liệu
         [HttpGet("{documentId}")]
         public async Task<IActionResult> GetDocumentById(int documentId)
         {
@@ -95,6 +63,7 @@ public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto dto
         }
 
         // Get all documents
+        [Authorize(Roles = "Admin,Pilot,Crew")] // Admin, Phi công, và Tiếp viên đều có thể xem tất cả tài liệu
         [HttpGet]
         public async Task<IActionResult> GetAllDocuments()
         {
@@ -111,6 +80,7 @@ public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto dto
         }
 
         // Update a document
+        [Authorize(Roles = "Admin,Back-Office")] // Chỉ Admin và Nhân viên Back-Office được phép cập nhật tài liệu
         [HttpPut("{documentId}")]
         public async Task<IActionResult> UpdateDocument(int documentId, DocumentUpdateDto dto, IFormFile file)
         {
@@ -129,6 +99,7 @@ public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto dto
         }
 
         // Delete a document
+        [Authorize(Roles = "Admin")] // Chỉ Admin được phép xóa tài liệu
         [HttpDelete("{documentId}")]
         public async Task<IActionResult> DeleteDocument(int documentId)
         {
@@ -147,6 +118,7 @@ public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto dto
         }
 
         // Add document to a flight
+        [Authorize(Roles = "Admin,Back-Office")] // Chỉ Admin và Nhân viên Back-Office được phép thêm tài liệu vào chuyến bay
         [HttpPost("flight/{flightId}/add-document")]
         public async Task<IActionResult> AddDocumentToFlight(int flightId, [FromBody] DocumentCreateDto dto)
         {

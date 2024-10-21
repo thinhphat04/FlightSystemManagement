@@ -13,8 +13,7 @@ namespace FlightSystemManagement.Services.Interfaces
         Task<Flight> GetFlightByIdAsync(int flightId);
 
         // READ All Flights
-        Task<IEnumerable<Flight>> GetAllFlightsAsync();
-
+        Task<List<FlightDto>> GetAllFlightsAsync();
         // UPDATE Flight
         Task<Flight> UpdateFlightAsync(int flightId, FlightCreateDto dto);
 

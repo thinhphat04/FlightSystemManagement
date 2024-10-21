@@ -46,10 +46,21 @@ namespace FlightSystemManagement.Controllers
 
         // READ All Flights
         [HttpGet]
-        public async Task<IActionResult> GetAllFlights()
+        public async Task<IActionResult> GetAllFlights([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var flights = await _flightService.GetAllFlightsAsync();
-            return Ok(flights);
+            var paginatedFlights = flights
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+        
+            return Ok(new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = flights.Count,
+                Data = paginatedFlights
+            });
         }
 
         // UPDATE Flight

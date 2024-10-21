@@ -6,6 +6,7 @@ using FlightSystemManagement.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using FlightSystemManagement.DTO;
 using FlightSystemManagement.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace FlightSystemManagement.Controllers
@@ -67,7 +68,7 @@ namespace FlightSystemManagement.Controllers
                     Email = registerDto.Email,
                     PasswordHash = registerDto.Password,
                     FullName = registerDto.FullName,
-                    Role = "User",
+                    Role = "Crew",
                     RefreshToken = _tokenService.CreateRefreshToken(), // Tạo refresh token
                     RefreshTokenExpiryTime = DateTime.Now.AddDays(7)
                 };
@@ -86,6 +87,7 @@ namespace FlightSystemManagement.Controllers
         }
 
         // Xóa người dùng
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -122,37 +124,6 @@ namespace FlightSystemManagement.Controllers
                 RefreshToken = refreshToken,
             });
         }
-
-        
-        // Làm mới Access Token
-        // [HttpPost("refresh-token")]
-        // public async Task<IActionResult> RefreshToken([FromBody] TokenDto tokenDto)
-        // {
-        //     var principal = _tokenService.GetPrincipalFromExpiredToken(tokenDto.AccessToken);
-        //     var userId = int.Parse(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        //
-        //     var savedRefreshToken = await _userService.GetRefreshTokenAsync(userId); // Lấy Refresh Token đã lưu trong hệ thống
-        //
-        //     if (savedRefreshToken != tokenDto.RefreshToken)
-        //     {
-        //         return Unauthorized("Invalid refresh token");
-        //     }
-        //
-        //     // Tạo Access Token mới
-        //     var user = await _userService.GetUserByIdAsync(userId);
-        //     var roles = await _userService.
-        //     var newAccessToken = _tokenService.CreateAccessToken(user, roles);
-        //     var newRefreshToken = _tokenService.CreateRefreshToken();
-        //
-        //     // Lưu Refresh Token mới vào hệ thống
-        //     await _userService.SaveRefreshTokenAsync(user.UserID, newRefreshToken);
-        //
-        //     return Ok(new
-        //     {
-        //         AccessToken = newAccessToken,
-        //         RefreshToken = newRefreshToken
-        //     });
-        // }
 
     }
 }

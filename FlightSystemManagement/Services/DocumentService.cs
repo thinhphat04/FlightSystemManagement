@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FlightSystemManagement.Data;
 using FlightSystemManagement.DTO;
 using FlightSystemManagement.Entity;
@@ -16,20 +17,61 @@ namespace FlightSystemManagement.Services
         }
 
         // Create a new document
-        public async Task<Document> CreateDocumentAsync(DocumentCreateDto dto, string filePath, int creatorId)
+        public async Task<Document> CreateDocumentAsync(DocumentCreateDto dto, IFormFile file, ClaimsPrincipal user)
         {
+            // Kiểm tra file
+            if (file == null || file.Length == 0)
+            {
+                throw new ArgumentException("No file uploaded.");
+            }
+
+            // Chỉ chấp nhận file PDF và DOCX
+            var allowedExtensions = new[] { ".pdf", ".docx" };
+            var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                throw new ArgumentException("Only PDF and DOCX files are allowed.");
+            }
+
+            // Đường dẫn lưu file
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
+
+            // Tạo thư mục nếu chưa tồn tại
+            if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")))
+            {
+                Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
+            }
+
+            // Lưu file vào thư mục
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // Lấy CreatorId từ token Bearer
+            var creatorIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            if (creatorIdClaim == null)
+            {
+                throw new UnauthorizedAccessException("User not found.");
+            }
+
+            // Gán CreatorId từ Bearer token thay vì từ phía client
+            int creatorId = int.Parse(creatorIdClaim.Value);
+
+            // Tạo tài liệu trong cơ sở dữ liệu
             var document = new Document
             {
                 Title = dto.Title,
                 Type = dto.Type,
                 Note = dto.Note,
-                CreatorID = creatorId,  // Use CreatorID from the Bearer token
-                FilePath = filePath,
-                CreatedDate = DateTime.Now // Assign current date
+                CreatorID = creatorId,
+                FilePath = filePath
             };
 
             _context.Documents.Add(document);
             await _context.SaveChangesAsync();
+
             return document;
         }
 
@@ -37,7 +79,9 @@ namespace FlightSystemManagement.Services
         public async Task<Document> GetDocumentByIdAsync(int documentId)
         {
             return await _context.Documents
-                                 .FirstOrDefaultAsync(d => d.DocumentID == documentId);  // No need to include Creator
+                .Include(d => d.FlightDocuments) // Include FlightDocuments
+                .ThenInclude(fd => fd.Flight)    // Include the Flight details if needed
+                .FirstOrDefaultAsync(d => d.DocumentID == documentId);
         }
 
         // Get all documents

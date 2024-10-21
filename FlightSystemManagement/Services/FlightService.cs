@@ -86,17 +86,39 @@ namespace FlightSystemManagement.Services
         public async Task<Flight> GetFlightByIdAsync(int flightId)
         {
             return await _context.Flights
-                .Include(f => f.FlightDocuments)
+                .Include(f => f.FlightDocuments) // Include FlightDocuments
+                .ThenInclude(fd => fd.Document)  // Include Document for each FlightDocument
                 .FirstOrDefaultAsync(f => f.FlightID == flightId);
         }
 
         // READ All Flights
-        public async Task<IEnumerable<Flight>> GetAllFlightsAsync()
+     public async Task<List<FlightDto>> GetAllFlightsAsync()
+    {
+        var flights = await _context.Flights
+            .Include(f => f.FlightDocuments)
+                .ThenInclude(fd => fd.Document)
+            .ToListAsync();
+
+        // Ánh xạ từ Flight sang FlightDto
+        var flightDtos = flights.Select(f => new FlightDto
         {
-            return await _context.Flights
-                .Include(f => f.FlightDocuments)
-                .ToListAsync();
-        }
+            FlightID = f.FlightID,
+            FlightNumber = f.FlightNumber,
+            DepartureDate = f.DepartureDate,
+            PointOfLoading = f.PointOfLoading,
+            PointOfUnloading = f.PointOfUnloading,
+            IsFlightCompleted = f.IsFlightCompleted,
+            FlightDocuments = f.FlightDocuments.Select(fd => new FlightDocumentDto
+            {
+                FlightDocumentID = fd.FlightDocumentID,
+                DocumentID = fd.DocumentID,
+                CreatedDate = fd.CreatedDate
+            }).ToList()
+        }).ToList();
+
+        return flightDtos;
+    }
+
 
         // UPDATE Flight
         public async Task<Flight> UpdateFlightAsync(int flightId, FlightCreateDto dto)
