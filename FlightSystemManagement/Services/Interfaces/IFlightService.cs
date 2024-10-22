@@ -1,6 +1,7 @@
 using FlightSystemManagement.Entity;
 using System.Threading.Tasks;
 using FlightSystemManagement.DTO;
+using FlightSystemManagement.DTO.Flight;
 
 namespace FlightSystemManagement.Services.Interfaces
 {

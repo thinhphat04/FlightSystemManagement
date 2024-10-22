@@ -1,5 +1,6 @@
 using FlightSystemManagement.Data;
 using FlightSystemManagement.DTO;
+using FlightSystemManagement.DTO.Permission;
 using FlightSystemManagement.Entity;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;

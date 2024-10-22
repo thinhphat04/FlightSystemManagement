@@ -3,6 +3,7 @@ using FlightSystemManagement.Entity;
 using FlightSystemManagement.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using FlightSystemManagement.DTO.Flight;
 using FlightSystemManagement.Services.Interfaces;
 
 namespace FlightSystemManagement.Controllers

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FlightSystemManagement.Data;
 using FlightSystemManagement.DTO;
+using FlightSystemManagement.DTO.Document;
 using FlightSystemManagement.Entity;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;

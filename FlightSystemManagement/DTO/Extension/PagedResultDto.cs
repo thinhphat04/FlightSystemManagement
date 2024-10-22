@@ -1,4 +1,4 @@
-namespace FlightSystemManagement.DTO;
+namespace FlightSystemManagement.DTO.Extension;
 
 public class PagedResultDto<T>
 {

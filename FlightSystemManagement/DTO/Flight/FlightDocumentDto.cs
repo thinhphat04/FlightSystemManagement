@@ -1,4 +1,4 @@
-namespace FlightSystemManagement.DTO;
+namespace FlightSystemManagement.DTO.Flight;
 
 public class FlightDocumentDto
 {

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using FlightSystemManagement.DTO;
+using FlightSystemManagement.DTO.Document;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

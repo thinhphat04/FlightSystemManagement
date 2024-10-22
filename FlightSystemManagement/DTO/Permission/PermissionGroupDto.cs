@@ -1,4 +1,4 @@
-namespace FlightSystemManagement.DTO
+namespace FlightSystemManagement.DTO.Permission
 {
     
     public class PermissionGroupDto

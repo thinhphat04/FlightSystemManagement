@@ -60,8 +60,6 @@ namespace FlightSystemManagement.Migrations
 
                     b.HasKey("DocumentID");
 
-                    b.HasIndex("CreatorID");
-
                     b.ToTable("Documents");
                 });
 
@@ -219,17 +217,6 @@ namespace FlightSystemManagement.Migrations
                     b.HasKey("UserID");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("FlightSystemManagement.Entity.Document", b =>
-                {
-                    b.HasOne("FlightSystemManagement.Entity.User", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Creator");
                 });
 
             modelBuilder.Entity("FlightSystemManagement.Entity.FlightDocument", b =>

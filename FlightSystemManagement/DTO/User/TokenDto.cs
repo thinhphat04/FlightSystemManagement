@@ -1,4 +1,4 @@
-namespace FlightSystemManagement.DTO;
+namespace FlightSystemManagement.DTO.User;
 
 public class TokenDto
 {

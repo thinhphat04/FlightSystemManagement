@@ -1,4 +1,5 @@
 using FlightSystemManagement.DTO;
+using FlightSystemManagement.DTO.Permission;
 using FlightSystemManagement.Entity;
 
 namespace FlightSystemManagement.Services.Interfaces;

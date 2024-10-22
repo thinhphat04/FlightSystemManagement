@@ -1,13 +1,10 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+
 using FlightSystemManagement.Entity;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using FlightSystemManagement.DTO;
-using FlightSystemManagement.Services;
+using FlightSystemManagement.DTO.User;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
 
 namespace FlightSystemManagement.Controllers
 {

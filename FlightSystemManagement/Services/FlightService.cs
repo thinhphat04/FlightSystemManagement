@@ -4,6 +4,8 @@ using FlightSystemManagement.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FlightSystemManagement.DTO.Document;
+using FlightSystemManagement.DTO.Flight;
 using FlightSystemManagement.Services.Interfaces;
 
 namespace FlightSystemManagement.Services

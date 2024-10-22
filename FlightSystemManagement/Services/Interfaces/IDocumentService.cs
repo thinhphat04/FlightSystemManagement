@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FlightSystemManagement.DTO;
+using FlightSystemManagement.DTO.Document;
 
 namespace FlightSystemManagement.Services.Interfaces
 {
