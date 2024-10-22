@@ -22,7 +22,9 @@ namespace FlightSystemManagement.Data
             // User Entity configuration
             modelBuilder.Entity<User>()
                 .HasKey(u => u.UserID); // Khóa chính cho bảng User
-
+            // modelBuilder.Entity<User>()
+            //     .Property(u => u.UserID)
+            //     .ValueGeneratedOnAdd(); // Tự động tăng giá trị cho UserID
             modelBuilder.Entity<User>()
                 .Property(u => u.Email)
                 .IsRequired()
@@ -100,6 +102,53 @@ namespace FlightSystemManagement.Data
                 .Property(f => f.PointOfUnloading)
                 .IsRequired()
                 .HasMaxLength(255); // Bắt buộc trường PointOfUnloading và giới hạn độ dài
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    UserID = 1, // Set UserID = 1
+                    FullName = "Admin User",
+                    Email = "admin@example.com",
+                    PasswordHash = "123456", // Placeholder, bạn có thể băm mật khẩu khi cần
+                    Role = "Admin",
+                    RefreshToken = Guid.NewGuid().ToString(),
+                    RefreshTokenExpiryTime = DateTime.Now.AddDays(7),
+                    Status = "Active"
+                },
+                new User
+                {
+                    UserID = 2, // Set UserID = 2
+                    FullName = "BackOffice User",
+                    Email = "backoffice@example.com",
+                    PasswordHash = "123456", // Placeholder, bạn có thể băm mật khẩu khi cần
+                    Role = "Back-Office",
+                    RefreshToken = Guid.NewGuid().ToString(),
+                    RefreshTokenExpiryTime = DateTime.Now.AddDays(7),
+                    Status = "Active"
+                },
+                new User
+                {
+                    UserID = 3, // Set UserID = 3
+                    FullName = "Pilot User",
+                    Email = "pilot@example.com",
+                    PasswordHash = "123456", // Placeholder, bạn có thể băm mật khẩu khi cần
+                    Role = "Pilot",
+                    RefreshToken = Guid.NewGuid().ToString(),
+                    RefreshTokenExpiryTime = DateTime.Now.AddDays(7),
+                    Status = "Active"
+                },
+                new User
+                {
+                    UserID = 4, // Set UserID = 4
+                    FullName = "Crew User",
+                    Email = "crew@example.com",
+                    PasswordHash = "123456", // Placeholder, bạn có thể băm mật khẩu khi cần
+                    Role = "Crew",
+                    RefreshToken = Guid.NewGuid().ToString(),
+                    RefreshTokenExpiryTime = DateTime.Now.AddDays(7),
+                    Status = "Active"
+                }
+            );
+
         }
     }
 }

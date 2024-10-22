@@ -7,7 +7,7 @@ namespace FlightSystemManagement.Services.Interfaces;
 public interface IPermissionService
 {
     Task<Permission> SetPermissionAsync(PermissionCreateDto dto);
-    Task<Permission> GetPermissionAsync(int documentId, int groupId);
-    Task<List<Permission>> GetPermissionsByDocumentAsync(int documentId);
+    Task<PermissionDto> GetPermissionAsync(int documentId, int groupId);
+    Task<List<PermissionDto>> GetPermissionsByDocumentAsync(int documentId);
     Task<bool> RemovePermissionAsync(int documentId, int groupId);
 }

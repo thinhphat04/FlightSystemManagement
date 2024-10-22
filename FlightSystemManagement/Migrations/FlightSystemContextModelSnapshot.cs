@@ -217,6 +217,56 @@ namespace FlightSystemManagement.Migrations
                     b.HasKey("UserID");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            UserID = 1,
+                            CreatedAt = new DateTime(2024, 10, 22, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5650),
+                            Email = "admin@example.com",
+                            FullName = "Admin User",
+                            PasswordHash = "123456",
+                            RefreshToken = "c8a5ad80-8c8b-44ee-93d9-68d74abcfa4c",
+                            RefreshTokenExpiryTime = new DateTime(2024, 10, 29, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5680),
+                            Role = "Admin",
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            UserID = 2,
+                            CreatedAt = new DateTime(2024, 10, 22, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5690),
+                            Email = "backoffice@example.com",
+                            FullName = "BackOffice User",
+                            PasswordHash = "123456",
+                            RefreshToken = "64c15ad3-85d8-4203-b46f-fb93a4551bb0",
+                            RefreshTokenExpiryTime = new DateTime(2024, 10, 29, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5700),
+                            Role = "Back-Office",
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            UserID = 3,
+                            CreatedAt = new DateTime(2024, 10, 22, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5700),
+                            Email = "pilot@example.com",
+                            FullName = "Pilot User",
+                            PasswordHash = "123456",
+                            RefreshToken = "1d3c9acf-0622-4c47-82eb-da7af5d2ba6b",
+                            RefreshTokenExpiryTime = new DateTime(2024, 10, 29, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5710),
+                            Role = "Pilot",
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            UserID = 4,
+                            CreatedAt = new DateTime(2024, 10, 22, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5710),
+                            Email = "crew@example.com",
+                            FullName = "Crew User",
+                            PasswordHash = "123456",
+                            RefreshToken = "2cc9ebfb-ee1f-4f87-8423-961ff1655e0c",
+                            RefreshTokenExpiryTime = new DateTime(2024, 10, 29, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5710),
+                            Role = "Crew",
+                            Status = "Active"
+                        });
                 });
 
             modelBuilder.Entity("FlightSystemManagement.Entity.FlightDocument", b =>
