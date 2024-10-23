@@ -10,4 +10,5 @@ public interface IPermissionService
     Task<PermissionDto> GetPermissionAsync(int documentId, int groupId);
     Task<List<PermissionDto>> GetPermissionsByDocumentAsync(int documentId);
     Task<bool> RemovePermissionAsync(int documentId, int groupId);
+    Task<string> SavePermissionsAsync(PermissionDto model);
 }

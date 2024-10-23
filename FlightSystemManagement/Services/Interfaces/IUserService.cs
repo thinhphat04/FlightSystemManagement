@@ -16,6 +16,9 @@ namespace FlightSystemManagement.Services.Interfaces
         bool IsCrew(User user);
         Task SaveRefreshTokenAsync(int userId, string refreshToken);
         Task<string> GetRefreshTokenAsync(int userId);
+        
+        Task<bool> DisableUserByEmailAsync(string email);
+        Task<bool> EnableUserByEmailAsync(string email); 
     }
 
 }

@@ -15,6 +15,7 @@ namespace FlightSystemManagement.Data
         public DbSet<Document> Documents { get; set; }
         public DbSet<FlightDocument> FlightDocuments { get; set; }
         public DbSet<Permission> Permissions { get; set; }
+        
         public DbSet<PermissionGroup> PermissionGroups { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -102,13 +103,14 @@ namespace FlightSystemManagement.Data
                 .Property(f => f.PointOfUnloading)
                 .IsRequired()
                 .HasMaxLength(255); // Bắt buộc trường PointOfUnloading và giới hạn độ dài
+            
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
                     UserID = 1, // Set UserID = 1
                     FullName = "Admin User",
-                    Email = "admin@example.com",
-                    PasswordHash = "123456", // Placeholder, bạn có thể băm mật khẩu khi cần
+                    Email = "admin@vietjetair.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"), // Băm mật khẩu
                     Role = "Admin",
                     RefreshToken = Guid.NewGuid().ToString(),
                     RefreshTokenExpiryTime = DateTime.Now.AddDays(7),
@@ -118,8 +120,8 @@ namespace FlightSystemManagement.Data
                 {
                     UserID = 2, // Set UserID = 2
                     FullName = "BackOffice User",
-                    Email = "backoffice@example.com",
-                    PasswordHash = "123456", // Placeholder, bạn có thể băm mật khẩu khi cần
+                    Email = "backoffice@vietjetair.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"), // Băm mật khẩu
                     Role = "Back-Office",
                     RefreshToken = Guid.NewGuid().ToString(),
                     RefreshTokenExpiryTime = DateTime.Now.AddDays(7),
@@ -129,8 +131,8 @@ namespace FlightSystemManagement.Data
                 {
                     UserID = 3, // Set UserID = 3
                     FullName = "Pilot User",
-                    Email = "pilot@example.com",
-                    PasswordHash = "123456", // Placeholder, bạn có thể băm mật khẩu khi cần
+                    Email = "pilot@vietjetair.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"), // Băm mật khẩu
                     Role = "Pilot",
                     RefreshToken = Guid.NewGuid().ToString(),
                     RefreshTokenExpiryTime = DateTime.Now.AddDays(7),
@@ -140,14 +142,37 @@ namespace FlightSystemManagement.Data
                 {
                     UserID = 4, // Set UserID = 4
                     FullName = "Crew User",
-                    Email = "crew@example.com",
-                    PasswordHash = "123456", // Placeholder, bạn có thể băm mật khẩu khi cần
+                    Email = "crew@vietjetair.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"), // Băm mật khẩu
                     Role = "Crew",
                     RefreshToken = Guid.NewGuid().ToString(),
                     RefreshTokenExpiryTime = DateTime.Now.AddDays(7),
                     Status = "Active"
                 }
             );
+            
+            modelBuilder.Entity<PermissionGroup>().HasData(
+        new PermissionGroup
+        {
+            PermissionGroupID = 1,
+            GroupName = "Admin" // Nhóm quyền Admin
+        },
+        new PermissionGroup
+        {
+            PermissionGroupID = 2,
+            GroupName = "Back-Office" // Nhóm quyền Back-Office
+        },
+        new PermissionGroup
+        {
+            PermissionGroupID = 3,
+            GroupName = "Pilot" // Nhóm quyền Pilot
+        },
+        new PermissionGroup
+        {
+            PermissionGroupID = 4,
+            GroupName = "Crew" // Nhóm quyền Crew
+        }
+    );
 
         }
     }

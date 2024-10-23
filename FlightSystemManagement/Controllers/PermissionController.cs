@@ -65,6 +65,18 @@ public class PermissionsController : ControllerBase
             return StatusCode(500, new { message = "An error occurred while retrieving permissions for the document.", details = ex.Message });
         }
     }
+    
+    [HttpPost("save-permissions")]
+    public async Task<IActionResult> SavePermissions([FromBody] PermissionDto model)
+    {
+        var result = await _permissionService.SavePermissionsAsync(model);
+        if (result == "Document not found")
+        {
+            return NotFound(result);
+        }
+
+        return Ok(result);
+    }
 
     // Remove permission for a document and group
     [HttpDelete("{documentId}/{groupId}")]

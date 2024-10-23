@@ -146,6 +146,9 @@ namespace FlightSystemManagement.Migrations
                     b.Property<int>("DocumentID")
                         .HasColumnType("int");
 
+                    b.Property<bool>("NoPermission")
+                        .HasColumnType("bit");
+
                     b.Property<int>("PermissionGroupID")
                         .HasColumnType("int");
 
@@ -173,6 +176,28 @@ namespace FlightSystemManagement.Migrations
                     b.HasKey("PermissionGroupID");
 
                     b.ToTable("PermissionGroups");
+
+                    b.HasData(
+                        new
+                        {
+                            PermissionGroupID = 1,
+                            GroupName = "Admin"
+                        },
+                        new
+                        {
+                            PermissionGroupID = 2,
+                            GroupName = "Back-Office"
+                        },
+                        new
+                        {
+                            PermissionGroupID = 3,
+                            GroupName = "Pilot"
+                        },
+                        new
+                        {
+                            PermissionGroupID = 4,
+                            GroupName = "Crew"
+                        });
                 });
 
             modelBuilder.Entity("FlightSystemManagement.Entity.User", b =>
@@ -222,48 +247,48 @@ namespace FlightSystemManagement.Migrations
                         new
                         {
                             UserID = 1,
-                            CreatedAt = new DateTime(2024, 10, 22, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5650),
-                            Email = "admin@example.com",
+                            CreatedAt = new DateTime(2024, 10, 23, 16, 5, 55, 434, DateTimeKind.Local).AddTicks(6370),
+                            Email = "admin@vietjetair.com",
                             FullName = "Admin User",
-                            PasswordHash = "123456",
-                            RefreshToken = "c8a5ad80-8c8b-44ee-93d9-68d74abcfa4c",
-                            RefreshTokenExpiryTime = new DateTime(2024, 10, 29, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5680),
+                            PasswordHash = "$2a$11$jZErUBa25UAPYFvidLqZA..ThCGdTzj2.KDF.ieKiWz.J1sUOWgo6",
+                            RefreshToken = "4d635d15-be34-4f24-9bce-3c1e7d14fef9",
+                            RefreshTokenExpiryTime = new DateTime(2024, 10, 30, 16, 5, 55, 578, DateTimeKind.Local).AddTicks(9280),
                             Role = "Admin",
                             Status = "Active"
                         },
                         new
                         {
                             UserID = 2,
-                            CreatedAt = new DateTime(2024, 10, 22, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5690),
-                            Email = "backoffice@example.com",
+                            CreatedAt = new DateTime(2024, 10, 23, 16, 5, 55, 578, DateTimeKind.Local).AddTicks(9340),
+                            Email = "backoffice@vietjetair.com",
                             FullName = "BackOffice User",
-                            PasswordHash = "123456",
-                            RefreshToken = "64c15ad3-85d8-4203-b46f-fb93a4551bb0",
-                            RefreshTokenExpiryTime = new DateTime(2024, 10, 29, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5700),
+                            PasswordHash = "$2a$11$fYaGRrxBk8AvlpRawXH0DuYDp.GwjZy56W0Cyk.5AeJKxoDLUegYe",
+                            RefreshToken = "22e58087-2e0b-4fba-bce6-0b0a2af587d0",
+                            RefreshTokenExpiryTime = new DateTime(2024, 10, 30, 16, 5, 55, 723, DateTimeKind.Local).AddTicks(7880),
                             Role = "Back-Office",
                             Status = "Active"
                         },
                         new
                         {
                             UserID = 3,
-                            CreatedAt = new DateTime(2024, 10, 22, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5700),
-                            Email = "pilot@example.com",
+                            CreatedAt = new DateTime(2024, 10, 23, 16, 5, 55, 723, DateTimeKind.Local).AddTicks(7940),
+                            Email = "pilot@vietjetair.com",
                             FullName = "Pilot User",
-                            PasswordHash = "123456",
-                            RefreshToken = "1d3c9acf-0622-4c47-82eb-da7af5d2ba6b",
-                            RefreshTokenExpiryTime = new DateTime(2024, 10, 29, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5710),
+                            PasswordHash = "$2a$11$hNqD5zO.QQSWG61hsZEfUOvYLMz31hB0Zqz/CkWCePHd0diUY/zBi",
+                            RefreshToken = "c73ca1f1-e4ad-4686-9873-36a70d03c13e",
+                            RefreshTokenExpiryTime = new DateTime(2024, 10, 30, 16, 5, 55, 870, DateTimeKind.Local).AddTicks(7890),
                             Role = "Pilot",
                             Status = "Active"
                         },
                         new
                         {
                             UserID = 4,
-                            CreatedAt = new DateTime(2024, 10, 22, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5710),
-                            Email = "crew@example.com",
+                            CreatedAt = new DateTime(2024, 10, 23, 16, 5, 55, 870, DateTimeKind.Local).AddTicks(7950),
+                            Email = "crew@vietjetair.com",
                             FullName = "Crew User",
-                            PasswordHash = "123456",
-                            RefreshToken = "2cc9ebfb-ee1f-4f87-8423-961ff1655e0c",
-                            RefreshTokenExpiryTime = new DateTime(2024, 10, 29, 14, 38, 4, 116, DateTimeKind.Local).AddTicks(5710),
+                            PasswordHash = "$2a$11$a8bCp1N83FqDKnbZoNrOb.KSNWZV.NNv7E5hvhQQEHVHQl6LhgVRm",
+                            RefreshToken = "a4374eef-5a4e-47c8-bb0e-f1b02b3ed851",
+                            RefreshTokenExpiryTime = new DateTime(2024, 10, 30, 16, 5, 56, 13, DateTimeKind.Local).AddTicks(7320),
                             Role = "Crew",
                             Status = "Active"
                         });

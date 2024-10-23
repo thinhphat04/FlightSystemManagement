@@ -121,6 +121,46 @@ namespace FlightSystemManagement.Controllers
                 RefreshToken = refreshToken,
             });
         }
+        
+        // API để vô hiệu hóa tài khoản (chỉ Admin mới có quyền)
+        [HttpPut("disable")]
+        [Authorize(Roles = "Admin")] // Chỉ Admin mới có thể vô hiệu hóa tài khoản
+        public async Task<IActionResult> DisableUser([FromBody] DisableAccountDto dto)
+        {
+            try
+            {
+                var result = await _userService.DisableUserByEmailAsync(dto.Email);
+                if (result)
+                {
+                    return Ok("User disabled successfully");
+                }
+                return NotFound("User not found");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // API để bật lại tài khoản người dùng (chỉ Admin mới có quyền)
+        [HttpPut("enable")]
+        [Authorize(Roles = "Admin")] // Chỉ Admin mới có thể bật lại tài khoản
+        public async Task<IActionResult> EnableUser([FromBody] DisableAccountDto dto)
+        {
+            try
+            {
+                var result = await _userService.EnableUserByEmailAsync(dto.Email);
+                if (result)
+                {
+                    return Ok("User enabled successfully");
+                }
+                return NotFound("User not found");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
     }
 }

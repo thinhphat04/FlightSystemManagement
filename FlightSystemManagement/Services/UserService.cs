@@ -24,10 +24,19 @@ namespace FlightSystemManagement.Services
     {
         if (!email.EndsWith("@vietjetair.com", StringComparison.OrdinalIgnoreCase))
         {
-            return null;
+            throw new ArgumentException("Email must belong to vietjetair.com domain.");
         }
+
         var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)) return null;
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("User not found.");
+        }
+
+        if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+        {
+            throw new UnauthorizedAccessException("Invalid password.");
+        }
 
         return user;
     }
@@ -124,6 +133,36 @@ namespace FlightSystemManagement.Services
         var user = await _context.Users.FindAsync(userId);
         return user?.RefreshToken;
     }
+    
+    // Vô hiệu hóa tài khoản
+    public async Task<bool> DisableUserByEmailAsync(string email)
+    {
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+        {
+            return false;
+        }
+
+        user.Status = "Disabled"; // Cập nhật trạng thái thành Disabled
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    // Bật lại tài khoản dựa trên email
+    public async Task<bool> EnableUserByEmailAsync(string email)
+    {
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+        {
+            return false;
+        }
+
+        user.Status = "Active"; // Cập nhật trạng thái thành Active
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
 }
+    
 
 }
