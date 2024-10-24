@@ -92,55 +92,71 @@ namespace FlightSystemManagement.Services
         }
 
         // Update a document
-        public async Task<Document> UpdateDocumentAsync(int documentId, DocumentUpdateDto dto, IFormFile file)
+         public async Task<Document> UpdateDocumentAsync(int documentId, DocumentUpdateDto dto, IFormFile file, ClaimsPrincipal user)
+    {
+    // Get the document by its ID
+    var document = await _context.Documents.FindAsync(documentId);
+    if (document == null) return null;
+
+    // Check if the user has permission to update the document
+    var userRole = user.FindFirst(ClaimTypes.Role)?.Value;
+    if (userRole != "Admin" && userRole != "Back-Office")
+    {
+        throw new UnauthorizedAccessException("You do not have permission to update this document.");
+    }
+
+    // Increment document version
+    var currentVersionParts = document.Version?.Split('.') ?? new[] { "1", "0" };
+    if (currentVersionParts.Length == 2 &&
+        int.TryParse(currentVersionParts[0], out int majorVersion) &&
+        int.TryParse(currentVersionParts[1], out int minorVersion))
+    {
+        minorVersion += 1;
+        document.Version = $"{majorVersion}.{minorVersion}";
+    }
+    else
+    {
+        document.Version = "1.1";
+    }
+
+    // Update other document properties
+    document.Title = dto.Title;
+    document.Type = dto.Type;
+    document.Note = dto.Note;
+
+    // Handle file updates if a new file is provided
+    if (file != null && file.Length > 0)
+    {
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
+
+        // Ensure directory exists
+        if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")))
         {
-            var document = await _context.Documents.FindAsync(documentId);
-            if (document == null)
-                return null;
-
-            // Increment document version
-            var currentVersionParts = document.Version.Split('.');
-            if (currentVersionParts.Length == 2 &&
-                int.TryParse(currentVersionParts[0], out int majorVersion) &&
-                int.TryParse(currentVersionParts[1], out int minorVersion))
-            {
-                minorVersion += 1;
-                document.Version = $"{majorVersion}.{minorVersion}";
-            }
-            else
-            {
-                document.Version = "1.1";
-            }
-
-            // Update document properties
-            document.Title = dto.Title;
-            document.Type = dto.Type;
-            document.Note = dto.Note;
-
-            // Handle file updates
-            if (file != null && file.Length > 0)
-            {
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
-                if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")))
-                {
-                    Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
-                }
-                if (!string.IsNullOrEmpty(document.FilePath) && File.Exists(document.FilePath))
-                {
-                    File.Delete(document.FilePath);
-                }
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-                document.FilePath = filePath;
-            }
-
-            _context.Documents.Update(document);
-            await _context.SaveChangesAsync();
-            return document;
+            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
         }
 
+        // Delete the old file if it exists
+        if (!string.IsNullOrEmpty(document.FilePath) && File.Exists(document.FilePath))
+        {
+            File.Delete(document.FilePath);
+        }
+
+        // Save the new file
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        // Update the file path in the document
+        document.FilePath = filePath;
+    }
+
+    // Save changes to the database
+    _context.Documents.Update(document);
+    await _context.SaveChangesAsync();
+
+    return document;
+}
         // Delete a document
         public async Task<bool> DeleteDocumentAsync(int documentId)
         {

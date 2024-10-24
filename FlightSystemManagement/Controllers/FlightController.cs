@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using FlightSystemManagement.DTO.Flight;
 using FlightSystemManagement.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FlightSystemManagement.Controllers
 {
@@ -89,7 +90,7 @@ namespace FlightSystemManagement.Controllers
 
             return NoContent();
         }
-        
+        [Authorize(Roles = "Admin,Back-Office")]
         [HttpPost("{flightId}/documents/{documentId}")]
         public async Task<IActionResult> AddDocumentToFlight(int flightId, int documentId)
         {

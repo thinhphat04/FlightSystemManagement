@@ -81,21 +81,25 @@ namespace FlightSystemManagement.Controllers
         }
 
         // Update a document
-        [Authorize(Roles = "Admin,Back-Office")] // Chỉ Admin và Nhân viên Back-Office được phép cập nhật tài liệu
+        [Authorize(Roles = "Admin,Back-Office")] // Only Admin and Back-Office can update
         [HttpPut("{documentId}")]
-        public async Task<IActionResult> UpdateDocument(int documentId, DocumentUpdateDto dto, IFormFile file)
+        public async Task<IActionResult> UpdateDocument(int documentId, [FromForm] DocumentUpdateDto dto, IFormFile file)
         {
             try
             {
-                var document = await _documentService.UpdateDocumentAsync(documentId, dto, file);
-                if (document == null)
-                    return NotFound();
-                return Ok(document);
+                // Call the service to update the document
+                var updatedDocument = await _documentService.UpdateDocumentAsync(documentId, dto, file, User);
+
+                if (updatedDocument == null)
+                {
+                    return NotFound("Document not found");
+                }
+
+                return Ok(updatedDocument);
             }
             catch (Exception ex)
             {
-                // Log lỗi tại đây nếu cần
-                return StatusCode(500, new { message = "An error occurred while updating the document.", details = ex.Message });
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -119,24 +123,24 @@ namespace FlightSystemManagement.Controllers
         }
 
         // Add document to a flight
-        [Authorize(Roles = "Admin,Back-Office")] // Chỉ Admin và Nhân viên Back-Office được phép thêm tài liệu vào chuyến bay
-        [HttpPost("flight/{flightId}/add-document")]
-        public async Task<IActionResult> AddDocumentToFlight(int flightId, [FromBody] DocumentCreateDto dto)
-        {
-            try
-            {
-                var document = await _documentService.AddDocumentToFlightAsync(flightId, dto);
-                return CreatedAtAction(nameof(GetDocumentById), new { documentId = document.DocumentID }, document);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                // Log lỗi tại đây nếu cần
-                return StatusCode(500, new { message = "An error occurred while adding the document to the flight.", details = ex.Message });
-            }
-        }
+        // [Authorize(Roles = "Admin,Back-Office")] // Chỉ Admin và Nhân viên Back-Office được phép thêm tài liệu vào chuyến bay
+        // [HttpPost("flight/{flightId}/add-document")]
+        // public async Task<IActionResult> AddDocumentToFlight(int flightId, [FromBody] DocumentCreateDto dto)
+        // {
+        //     try
+        //     {
+        //         var document = await _documentService.AddDocumentToFlightAsync(flightId, dto);
+        //         return CreatedAtAction(nameof(GetDocumentById), new { documentId = document.DocumentID }, document);
+        //     }
+        //     catch (InvalidOperationException ex)
+        //     {
+        //         return BadRequest(new { message = ex.Message });
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         // Log lỗi tại đây nếu cần
+        //         return StatusCode(500, new { message = "An error occurred while adding the document to the flight.", details = ex.Message });
+        //     }
+        // }
     }
 }

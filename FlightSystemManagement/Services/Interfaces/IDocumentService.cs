@@ -12,7 +12,8 @@ namespace FlightSystemManagement.Services.Interfaces
         Task<Document> CreateDocumentAsync(DocumentCreateDto dto, IFormFile file, ClaimsPrincipal user);
            Task<Document> GetDocumentByIdAsync(int documentId);
         Task<List<Document>> GetAllDocumentsAsync();
-        Task<Document> UpdateDocumentAsync(int documentId, DocumentUpdateDto dto,IFormFile file);
+        Task<Document> UpdateDocumentAsync(int documentId, DocumentUpdateDto dto, IFormFile file, ClaimsPrincipal user);
+
         Task<bool> DeleteDocumentAsync(int documentId);
         
         Task<Document> AddDocumentToFlightAsync(int flightId, DocumentCreateDto dto);
