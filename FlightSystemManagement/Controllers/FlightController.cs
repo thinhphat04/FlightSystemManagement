@@ -109,5 +109,25 @@ namespace FlightSystemManagement.Controllers
 
             return BadRequest("Không thể thêm tài liệu vào chuyến bay.");
         }
+        
+        [Authorize(Roles = "Admin")] // Only Admins can mark a flight as completed
+        [HttpPut("{flightId}/completion-status")]
+        public async Task<IActionResult> UpdateFlightCompletionStatus(int flightId, [FromBody] bool isCompleted)
+        {
+            try
+            {
+                var updatedFlight = await _flightService.UpdateFlightCompletionStatusAsync(flightId, isCompleted);
+                if (updatedFlight == null)
+                {
+                    return NotFound("Flight not found");
+                }
+
+                return Ok(updatedFlight);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

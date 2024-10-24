@@ -169,6 +169,23 @@ namespace FlightSystemManagement.Services
                 await _context.SaveChangesAsync();
             }
         }
+        
+        public async Task<Flight> UpdateFlightCompletionStatusAsync(int flightId, bool isCompleted)
+        {
+            var flight = await _context.Flights.FindAsync(flightId);
+            if (flight == null)
+            {
+                return null; // Flight not found
+            }
+
+            // Update the flight's completion status
+            flight.IsFlightCompleted = isCompleted;
+
+            _context.Flights.Update(flight);
+            await _context.SaveChangesAsync();
+
+            return flight;
+        }
 
     }
 }
