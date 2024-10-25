@@ -9,10 +9,6 @@
       "PackagePath": "staticwebassets/uploads/BangDiem_NgoThinhPhat.pdf"
     },
     {
-      "Id": "/Users/ngothinhphat/RiderProjects/FlightSystemMangement/FlightSystemManagement/wwwroot/uploads/CV_NgoThinhPhat_BackEndDeveloper_VN.pdf",
-      "PackagePath": "staticwebassets/uploads/CV_NgoThinhPhat_BackEndDeveloper_VN.pdf"
-    },
-    {
       "Id": "obj/Debug/net8.0/staticwebassets/msbuild.FlightSystemManagement.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },

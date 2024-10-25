@@ -1,4 +1,6 @@
 
+using System.Security.Claims;
+using System.Text.Json;
 using FlightSystemManagement.Entity;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -161,6 +163,52 @@ namespace FlightSystemManagement.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        
+        [Authorize]
+        [HttpPost("update-password")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto dto)
+        {
+            // Lấy userId từ token bearer
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User not found.");
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+            var result = await _userService.UpdatePasswordAsync(userId, dto.NewPassword);
+
+            if (result)
+            {
+                return Ok("Password updated successfully");
+            }
+
+            return BadRequest("Failed to update password");
+        }
+
+        // API để cập nhật thông tin người dùng
+        [Authorize]
+        [HttpPut("update-name")]
+        public async Task<IActionResult> UpdateUserName([FromBody] UpdateUserInfoDto updateData)
+        {
+            // Lấy userId từ token bearer
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User not found.");
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+            var result = await _userService.UpdateUserNameAsync(userId, updateData);
+
+            if (result)
+            {
+                return Ok("User name updated successfully");
+            }
+
+            return BadRequest("Failed to update user name");
+        }
+
 
     }
 }

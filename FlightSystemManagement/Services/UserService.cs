@@ -1,7 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using FlightSystemManagement.Data;
+using FlightSystemManagement.DTO.User;
 using FlightSystemManagement.Entity;
 using FlightSystemManagement.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +15,15 @@ namespace FlightSystemManagement.Services
 {
     private readonly FlightSystemContext _context;
     private readonly IConfiguration _configuration;
+    
 
     public UserService(FlightSystemContext context, IConfiguration configuration)
     {
         _context = context;
         _configuration = configuration;
     }
+    
+    
     // xử lý đăng nhập
     public async Task<User> AuthenticateAsync(string email, string password)
     {
@@ -161,6 +166,37 @@ namespace FlightSystemManagement.Services
         await _context.SaveChangesAsync();
         return true;
     }
+    
+     // Cập nhật mật khẩu người dùng
+        public async Task<bool> UpdatePasswordAsync(int userId, string newPassword)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return false;
+
+            // Mã hóa mật khẩu mới sử dụng BCrypt
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // Cập nhật thông tin người dùng
+        public async Task<bool> UpdateUserNameAsync(int userId, UpdateUserInfoDto updateData)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return false;
+
+            // Kiểm tra và cập nhật fullName
+            if (!string.IsNullOrEmpty(updateData.FullName))
+            {
+                user.FullName = updateData.FullName;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+   
 
 }
     

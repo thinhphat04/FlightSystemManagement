@@ -1,4 +1,6 @@
+using System.Text.Json;
 using CloudinaryDotNet.Actions;
+using FlightSystemManagement.DTO.User;
 using FlightSystemManagement.Entity;
 
 namespace FlightSystemManagement.Services.Interfaces
@@ -19,6 +21,10 @@ namespace FlightSystemManagement.Services.Interfaces
         
         Task<bool> DisableUserByEmailAsync(string email);
         Task<bool> EnableUserByEmailAsync(string email); 
+        
+        Task<bool> UpdatePasswordAsync(int userId, string newPassword);
+        // UpdateUserNameAsync
+        Task<bool> UpdateUserNameAsync(int userId, UpdateUserInfoDto updateData);
     }
 
 }
